@@ -1,0 +1,5 @@
+project_name: readfcs
+description: Parse fcs files into AnnData
+project_slug: readfcs
+repository_name: readfcs
+package_name: readfcs
