@@ -220,6 +220,7 @@ class FCSFile:
     - allow reading in Path object
     - catch ValueError when reading in fcs using flowio.FlowData
     - catch ParserError in processing date
+    - fix the shape mismatch in .compensate()
 
     Args:
         filepath: str or Path
@@ -302,13 +303,14 @@ class FCSFile:
         channel_idx = [
             i for i, x in enumerate(self.channel_mappings) if x["marker"] != ""
         ]
-        if len(channel_idx) == 0:
-            # No markers defined in file
-            channel_idx = [
-                i
-                for i, x in enumerate(self.channel_mappings)
-                if all([z not in x["channel"].lower() for z in ["fsc", "ssc", "time"]])
-            ]
+
+        channel_idx = [
+            i
+            for i, x in enumerate(self.channel_mappings)
+            if all([z not in x["channel"].lower() for z in ["fsc", "ssc", "time"]])
+            and x["channel"] in self.spill.columns  # noqa
+        ]
+
         comp_data = self.event_data[:, channel_idx]
         comp_data = np.linalg.solve(self.spill.values.T, comp_data.T).T
         self.event_data[:, channel_idx] = comp_data
