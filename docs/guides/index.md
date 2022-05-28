@@ -3,5 +3,5 @@
 ```{toctree}
 :maxdepth: 1
 
-curate-data
+quickstart
 ```
