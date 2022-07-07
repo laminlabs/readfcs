@@ -3,12 +3,16 @@
 :end-line: 1
 ```
 
+- Get started with [Quickstart](guides/quickstart).
+- Check out the [API](api).
+- Learn about design decisions and comparisons to other tools: [notes](notes/index).
+
 ```{toctree}
 :maxdepth: 1
 :hidden:
 
-notes/index
 guides/index
 api
+notes/index
 changelog
 ```

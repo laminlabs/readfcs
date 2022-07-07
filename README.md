@@ -1,3 +1,3 @@
-# readfcs: Parse fcs files into AnnData
+# readfcs: Read fcs files
 
 Read the [docs](https://lamin.ai/readfcs).
