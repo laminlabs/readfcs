@@ -17,14 +17,8 @@ def build(session):
     session.install(".[dev,test]")
     session.run(
         "pytest",
-        "--nbmake",
-        "--overwrite",
-    )  # write output instead of capturing it (more verbose)
-    if Path("./lndocs").exists():  # GitHub Actions prefers nesting
-        session.install("./lndocs")
-    else:
-        session.install("../lndocs")  # Locally we have a flat structure
-    session.install(
-        "git+https://github.com/pydata/pydata-sphinx-theme.git"
-    )  # just temporarily until the new release comes out
+        "-s",
+    )
+    prefix = "." if Path("./lndocs").exists() else ".."
+    session.install(f"{prefix}/lndocs")
     session.run("lndocs")
