@@ -7,7 +7,7 @@
 :maxdepth: 1
 :hidden:
 
-tasks/index
+notes/index
 guides/index
 api
 changelog
