@@ -3,18 +3,13 @@ repos:
     rev: v3.2.0
     hooks:
       - id: trailing-whitespace
-        exclude: |
-          (?x)(
-              datasets/
-          )
       - id: end-of-file-fixer
         exclude: |
           (?x)(
-              datasets/
+              .github/workflows/latest-changes.jinja2
           )
       - id: check-yaml
       - id: check-added-large-files
-        args: [--maxkb=9999]
   - repo: https://github.com/psf/black
     rev: 22.3.0
     hooks:
@@ -30,6 +25,7 @@ repos:
         args:
           - --max-line-length=88
           - --ignore=E203
+          - --min-python-version=3.8.0
         exclude: |
           (?x)(
               __init__.py
@@ -44,26 +40,27 @@ repos:
       - id: nbstripout
         exclude: |
           (?x)(
+<<<<<<< HEAD
               docs/notes/
+=======
+              docs/tasks/|
+              docs/examples/
+>>>>>>> dfa99e5 (:bento: added datasets.example)
           )
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.1.9
     hooks:
       - id: forbid-crlf
-        exclude: |
-          (?x)(
-              datasets/
-          )
       - id: remove-crlf
-        exclude: |
-          (?x)(
-              datasets/
-          )
   - repo: https://github.com/pre-commit/mirrors-isort
     rev: v5.8.0
     hooks:
       - id: isort
-        args: ["--filter-files"]
+        args: ["--profile", "black"]
+        exclude: |
+          (?x)(
+              __init__.py
+          )
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v0.940
     hooks:
@@ -73,4 +70,8 @@ repos:
     hooks:
       - id: pydocstyle
         args: # google style + __init__, see http://www.pydocstyle.org/en/stable/error_codes.html
-          - --ignore=D100,D101,D102,D103,D107,D203,D204,D213,D215,D400,D401,D404,D406,D407,D408,D409,D413
+          - --ignore=D100,D101,D102,D103,D105,D107,D203,D204,D213,D215,D400,D401,D402,D403,D404,D406,D407,D408,D409,D413
+        exclude: |
+          (?x)(
+              __init__.py
+          )
