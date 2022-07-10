@@ -40,12 +40,8 @@ repos:
       - id: nbstripout
         exclude: |
           (?x)(
-<<<<<<< HEAD
-              docs/notes/
-=======
               docs/tasks/|
               docs/examples/
->>>>>>> dfa99e5 (:bento: added datasets.example)
           )
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.1.9
