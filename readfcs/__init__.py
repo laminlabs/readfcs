@@ -12,7 +12,7 @@ This is the complete API reference:
    FCSFile
 """
 
-__version__ = "0.1a1"  # pre-release for initial release 0.1.0
+__version__ = "0.1.0"
 
 from . import datasets
-from ._core import FCSFile  # noqa
+from ._core import FCSFile
