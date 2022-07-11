@@ -216,7 +216,7 @@ def _get_channel_mappings(fluoro_dict: dict) -> list:
 class FCSFile:
     """Utilising FlowIO to generate an object for representing an FCS file.
 
-    Code is modified from cytopy read_write.py to:
+    Code is modified from cytopy data.read_write.py to:
     - allow reading in Path object
     - catch ValueError when reading in fcs using flowio.FlowData
     - catch ParserError in processing date
@@ -238,6 +238,7 @@ class FCSFile:
             fcs = flowio.FlowData(filepath)
         except ValueError:
             fcs = flowio.FlowData(filepath, ignore_offset_error=True)
+        self._fcs = fcs
         self.filename = fcs.text.get("fil", "Unknown_filename")
         self.sys = fcs.text.get("sys", "Unknown_system")
         self.total_events = int(fcs.text.get("tot", 0))
@@ -314,3 +315,12 @@ class FCSFile:
         comp_data = self.event_data[:, channel_idx]
         comp_data = np.linalg.solve(self.spill.values.T, comp_data.T).T
         self.event_data[:, channel_idx] = comp_data
+
+    def write_fcs(self, filename, metadata=None):
+        """Export FCSFile instance as a new FCS file.
+
+        Args:
+            filename: name of exported FCS file
+            metadata: an optional dictionary for adding metadata keywords/values
+        """
+        self._fcs.write_fcs(filename=filename, metadata=metadata)
