@@ -4,6 +4,7 @@ from multiprocessing import Pool, cpu_count
 from pathlib import PosixPath
 from typing import Dict, List, Optional
 
+import anndata as ad
 import dateutil.parser as date_parser  # type: ignore
 import flowio
 import numpy as np
@@ -324,3 +325,27 @@ class FCSFile:
             metadata: an optional dictionary for adding metadata keywords/values
         """
         self._fcs.write_fcs(filename=filename, metadata=metadata)
+
+    def to_anndata(self):
+        """Convert the FCSFile instance to an AnnData."""
+        adata = ad.AnnData(
+            self.event_data,
+            var=pd.DataFrame(self.channel_mappings).set_index("channel"),
+        )
+        meta = {
+            "filename": self.filename,
+            "sys": self.sys,
+            "total_events": self.total_events,
+            "tube_name": self.tube_name,
+            "exp_name": self.exp_name,
+            "cytometer": self.cytometer,
+            "creator": self.creator,
+            "operator": self.operator,
+            "cst_pass": self.cst_pass,
+            "threshold": self.threshold[0],
+            "processing_date": self.processing_date,
+            "spill": self.spill,
+        }
+        adata.uns["meta"] = meta
+
+        return adata
