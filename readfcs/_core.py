@@ -323,14 +323,25 @@ class FCSFile:
         Args:
             filename: name of exported FCS file
             metadata: an optional dictionary for adding metadata keywords/values
+
         """
         self._fcs.write_fcs(filename=filename, metadata=metadata)
 
-    def to_anndata(self):
-        """Convert the FCSFile instance to an AnnData."""
+    def to_anndata(self) -> ad.AnnData:
+        """Convert the FCSFile instance to an AnnData.
+
+        Returns:
+            an AnnData object
+                variables will be indexed with marker names if possible otherwise
+                channels
+        """
         adata = ad.AnnData(
             self.event_data,
             var=pd.DataFrame(self.channel_mappings).set_index("channel"),
+        )
+        adata.var = adata.var.reset_index()
+        adata.var.index = np.where(
+            adata.var["marker"] == " ", adata.var["channel"], adata.var["marker"]
         )
         meta = {
             "filename": self.filename,
@@ -349,3 +360,22 @@ class FCSFile:
         adata.uns["meta"] = meta
 
         return adata
+
+
+def read(filepath, comp_matrix=None) -> ad.AnnData:
+    """Read in fcs file as AnnData.
+
+    Args:
+        filepath: str or Path
+            location of fcs file to parse
+        comp_matrix: str
+            csv file containing compensation matrix (optional, not required if a
+            spillover matrix is already linked to the file)
+
+    Returns:
+        an AnnData object
+            variables will be indexed with marker names if possible otherwise
+            channels
+    """
+    fcsfile = FCSFile(filepath, comp_matrix=comp_matrix)
+    return fcsfile.to_anndata()
