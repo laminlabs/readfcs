@@ -327,7 +327,7 @@ class FCSFile:
         """
         self._fcs.write_fcs(filename=filename, metadata=metadata)
 
-    def to_anndata(self):
+    def to_anndata(self) -> ad.AnnData:
         """Convert the FCSFile instance to an AnnData.
 
         Returns:
