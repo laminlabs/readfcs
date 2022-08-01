@@ -327,14 +327,8 @@ class FCSFile:
         """
         self._fcs.write_fcs(filename=filename, metadata=metadata)
 
-    def to_anndata(self) -> ad.AnnData:
-        """Convert the FCSFile instance to an AnnData.
-
-        Returns:
-            An AnnData object:
-                variables will be indexed with marker names if possible otherwise
-                channels
-        """
+    def to_anndata(self):
+        """Convert the FCSFile instance to an AnnData."""
         adata = ad.AnnData(
             self.event_data,
             var=pd.DataFrame(self.channel_mappings).set_index("channel"),
@@ -371,6 +365,11 @@ def read(filepath, comp_matrix=None) -> ad.AnnData:
         comp_matrix: str
             csv file containing compensation matrix (optional, not required if a
             spillover matrix is already linked to the file)
+
+    Returns:
+        An AnnData object:
+            variables will be indexed with marker names if possible otherwise
+            channels
     """
     fcsfile = FCSFile(filepath, comp_matrix=comp_matrix)
     return fcsfile.to_anndata()
