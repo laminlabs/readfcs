@@ -367,7 +367,7 @@ def read(filepath, comp_matrix=None) -> ad.AnnData:
             spillover matrix is already linked to the file)
 
     Returns:
-        An AnnData object:
+        An AnnData object: ad:AnnData
             variables will be indexed with marker names if possible otherwise
             channels
     """
