@@ -14,7 +14,7 @@ This is the complete API reference:
    datasets
 """
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 from . import datasets
 from ._core import FCSFile, read
