@@ -10,7 +10,7 @@ authors:
 url: https://github.com/laminlabs/readfcs
 preferred-citation:
   type: article
-  title: "readfcs: Read FCS file"
+  title: "readfcs: Read FCS files"
   authors:
   - family-names: Sun
     given-names: Sunny
