@@ -323,7 +323,7 @@ class FCSFile:
         """
         self._fcs.write_fcs(filename=filename, metadata=metadata)
 
-    def to_anndata(self, reindex=False) -> ad.AnnData:
+    def to_anndata(self, reindex=True) -> ad.AnnData:
         """Convert the FCSFile instance to an AnnData.
 
         Args:
@@ -341,6 +341,9 @@ class FCSFile:
             adata.var.index = np.where(
                 adata.var["marker"] == " ", adata.var["channel"], adata.var["marker"]
             )
+            mapper = pd.Series(adata.var.index, index=adata.var["channel"])
+            self.spill.index = self.spill.index.map(mapper)
+            self.spill.columns = self.spill.columns.map(mapper)
         meta = {
             "filename": self.filename,
             "sys": self.sys,
@@ -360,7 +363,7 @@ class FCSFile:
         return adata
 
 
-def read(filepath, comp_matrix=None, reindex=False) -> ad.AnnData:
+def read(filepath, comp_matrix=None, reindex=True) -> ad.AnnData:
     """Read in fcs file as AnnData.
 
     Args:
