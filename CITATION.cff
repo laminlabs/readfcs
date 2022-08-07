@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+title: "readfcs: Read FCS files"
+authors:
+- family-names: Sun
+  given-names: Sunny
+  orcid: https://orcid.org/0000-0002-2365-0888
+- family-names: Wolf
+  given-names: F. Alexander
+  orcid: https://orcid.org/0000-0002-8760-7838
+url: https://github.com/laminlabs/readfcs
+preferred-citation:
+  type: article
+  title: "readfcs: Read FCS file"
+  authors:
+  - family-names: Sun
+    given-names: Sunny
+    orcid: https://orcid.org/0000-0002-2365-0888
+  - family-names: Wolf
+    given-names: F. Alexander
+    orcid: https://orcid.org/0000-0002-8760-7838
+  doi: 10.56528/rfcs
+  start: 1
+  journal: Lamin Reports
+  year: 2022
+Footer
+© 2022 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Docs
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About
