@@ -5,7 +5,7 @@
 <!-- prettier-ignore -->
 Name | PR | User | Date | Patch
 --- | --- | --- | --- | ---
-🩹 Deals with spill is None | [9](https://github.com/laminlabs/readfcs/pull/9) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-09 |
+🩹 Deals with spill is None | [9](https://github.com/laminlabs/readfcs/pull/9) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-09 | 0.1.5
 🎨 Set default to redindex | [8](https://github.com/laminlabs/readfcs/pull/8) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-07 | 0.1.4
 🎨 Fixed index mismatch | [7](https://github.com/laminlabs/readfcs/pull/7) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-07 | 0.1.3
 ✨ Added a read function | [6](https://github.com/laminlabs/readfcs/pull/6) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-01 | 0.1.2
