@@ -339,11 +339,14 @@ class FCSFile:
         if reindex:
             adata.var = adata.var.reset_index()
             adata.var.index = np.where(
-                adata.var["marker"] == " ", adata.var["channel"], adata.var["marker"]
+                adata.var["marker"].isin(["", " "]),
+                adata.var["channel"],
+                adata.var["marker"],
             )
             mapper = pd.Series(adata.var.index, index=adata.var["channel"])
-            self.spill.index = self.spill.index.map(mapper)
-            self.spill.columns = self.spill.columns.map(mapper)
+            if self.spill is not None:
+                self.spill.index = self.spill.index.map(mapper)
+                self.spill.columns = self.spill.columns.map(mapper)
         meta = {
             "filename": self.filename,
             "sys": self.sys,
