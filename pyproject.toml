@@ -24,6 +24,7 @@ dev = [
 ]
 test = [
     "pytest>=6.0",
+    "pytest-cov",
     "nbmake",
 ]
 
