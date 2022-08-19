@@ -3,7 +3,7 @@
 :end-line: 4
 ```
 
-- Get started with [Quickstart](guides/quickstart).
+- Get started with [Quickstart](quickstart).
 - Check out the [API](api) reference.
 
 ```{toctree}
