@@ -18,7 +18,7 @@ def build(session):
     session.run(
         "pytest",
         "-s",
-        "--cov=lamindb",
+        "--cov=readfcs",
         "--cov-append",
         "--cov-report=term-missing",
     )
