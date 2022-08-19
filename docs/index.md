@@ -1,6 +1,6 @@
 ```{include} ../README.md
 :start-line: 0
-:end-line: 4
+:end-line: 5
 ```
 
 - Get started with [Quickstart](quickstart).
