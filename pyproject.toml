@@ -9,6 +9,7 @@ readme = "README.md"
 dynamic = ["version", "description"]
 dependencies = [
     "nbproject",
+    "lamin_logger",
     "flowio",
     "anndata",
 ]

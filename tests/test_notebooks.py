@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from lamindb._logger import logger
+from lamin_logger import logger
 from nbproject.dev import test
 
 
