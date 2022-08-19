@@ -5,6 +5,7 @@
 <!-- prettier-ignore -->
 Name | PR | User | Date | Patch
 --- | --- | --- | --- | ---
+📝 Make the tutorials executed | [10](https://github.com/laminlabs/readfcs/pull/10) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-19 |
 🩹 Deals with spill is None | [9](https://github.com/laminlabs/readfcs/pull/9) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-09 | 0.1.5
 🎨 Set default to redindex | [8](https://github.com/laminlabs/readfcs/pull/8) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-07 | 0.1.4
 🎨 Fixed index mismatch | [7](https://github.com/laminlabs/readfcs/pull/7) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-07 | 0.1.3
