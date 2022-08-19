@@ -24,6 +24,7 @@ dev = [
 ]
 test = [
     "pytest>=6.0",
+    "pytest-cov",
     "nbmake",
 ]
 
@@ -34,4 +35,9 @@ preview = true
 testpaths = [
     "tests",
     "docs",
+]
+
+[tool.coverage.run]
+omit = [
+    "readfcs/*",
 ]
