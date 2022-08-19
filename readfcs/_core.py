@@ -1,100 +1,10 @@
-import json
-import os
-from multiprocessing import Pool, cpu_count
 from pathlib import PosixPath
-from typing import Dict, List, Optional
 
 import anndata as ad
 import dateutil.parser as date_parser  # type: ignore
 import flowio
 import numpy as np
 import pandas as pd
-
-
-def filter_fcs_files(
-    fcs_dir: str, exclude_comps: bool = True, exclude_dir: str = "DUPLICATES"
-) -> list:
-    """Dict -> fcs file paths.
-
-    Given a directory, return file paths for all fcs files in directory and
-    subdirectories contained within.
-
-    Args:
-        fcs_dir: str
-            path to directory for search
-        exclude_comps: bool
-            if True, compensation files will be ignored (note: function
-            searches for 'comp' in file name for exclusion)
-        exclude_dir: str (default = 'DUPLICATES')
-            Will ignore any directories with this name
-
-    Returns:
-        list of fcs file paths
-    """
-    fcs_files: List[str] = []
-    for root, _, files in os.walk(fcs_dir):
-        if os.path.basename(root) == exclude_dir:
-            continue
-        if exclude_comps:
-            fcs = [
-                f
-                for f in files
-                if f.lower().endswith(".fcs") and f.lower().find("comp") == -1
-            ]
-        else:
-            fcs = [f for f in files if f.lower().endswith(".fcs")]
-        fcs = [os.path.join(root, f) for f in fcs]
-        fcs_files = fcs_files + fcs
-    return fcs_files
-
-
-def get_fcs_file_paths(
-    fcs_dir: str,
-    control_names: list,
-    ctrl_id: str,
-    ignore_comp: bool = True,
-    exclude_dir: str = "DUPLICATE",
-) -> dict:
-    """Generate a standard dictionary object of fcs files in given directory.
-
-    Args:
-        fcs_dir: str
-            target directory for search
-        control_names: list
-            names of expected control files (names must appear in filenames)
-        ctrl_id: str
-            global identifier for control file e.g. 'FMO' (must appear in filenames)
-        ignore_comp: bool, (default=True)
-            If True, files with 'compensation' in their name will be ignored
-            (default = True)
-        exclude_dir: str (default = 'DUPLICATES')
-            Will ignore any directories with this name
-
-    Returns:
-        standard dictionary of fcs files contained in target directory
-    """
-    file_tree: Dict = dict(primary=[], controls={})
-    fcs_files = filter_fcs_files(
-        fcs_dir, exclude_comps=ignore_comp, exclude_dir=exclude_dir
-    )
-    ctrl_files = [f for f in fcs_files if f.find(ctrl_id) != -1]
-    primary = [f for f in fcs_files if f.find(ctrl_id) == -1]
-    for c_name in control_names:
-        matched_controls = list(filter(lambda x: x.find(c_name) != -1, ctrl_files))
-        if not matched_controls:
-            print(f"Warning: no file found for {c_name} control")
-            continue
-        if len(matched_controls) > 1:
-            print(f"Warning: multiple files found for {c_name} control")
-        file_tree["controls"][c_name] = matched_controls
-
-    if len(primary) > 1:
-        print(
-            "Warning! Multiple non-control (primary) files found in directory. Check"
-            " before proceeding."
-        )
-    file_tree["primary"] = primary
-    return file_tree
 
 
 def chunks(df_list: list, n: int) -> pd.DataFrame:
@@ -113,46 +23,6 @@ def chunks(df_list: list, n: int) -> pd.DataFrame:
     """
     for i in range(0, len(df_list), n):
         yield df_list[i : i + n]
-
-
-def fcs_mappings(path: str) -> Optional[list]:
-    """Fetch channel mappings from fcs file.
-
-    Args:
-        path: str
-            path to fcs file
-
-    Returns:
-        List of channel mappings. Will return None if file fails to load.
-    """
-    try:
-        fo = FCSFile(path)
-    except ValueError as e:
-        print(f"Failed to load file {path}; {e}")
-        return None
-    return fo.channel_mappings
-
-
-def explore_channel_mappings(fcs_dir: str, exclude_comps: bool = True) -> list:
-    """Dict -> channel/marker mappings.
-
-    Given a directory, explore all fcs files and find all permutations of
-    channel/marker mappings.
-
-    Args:
-    fcs_dir: str
-        root directory to search
-    exclude_comps: bool, (default=True)
-        exclude compentation files (must have 'comp' in filename)
-
-    Returns:
-        list of all unique channel/marker mappings
-    """
-    fcs_files = filter_fcs_files(fcs_dir, exclude_comps)
-    with Pool(cpu_count()) as pool:
-        mappings = list(pool.map(fcs_mappings, fcs_files))  # type: ignore
-        mappings = list(pool.map(json.dumps, mappings))  # type: ignore
-    return [json.loads(x) for x in mappings]  # type: ignore
 
 
 def _get_spill_matrix(matrix_string: str) -> pd.DataFrame:
@@ -191,8 +61,8 @@ def _get_spill_matrix(matrix_string: str) -> pd.DataFrame:
 def _get_channel_mappings(fluoro_dict: dict) -> list:
     """Generate a list of dicts for fluorochrome mappings.
 
-    Generates a list of dictionary objects that describe the fluorochrome
-    mappings in this FCS file.
+    Code is modified from cytopy:
+    https://github.com/burtonrj/CytoPy/blob/master/cytopy/data/read_write.py
 
     Args:
         fluoro_dict: dict
@@ -217,7 +87,9 @@ def _get_channel_mappings(fluoro_dict: dict) -> list:
 class FCSFile:
     """Utilising FlowIO to generate an object for representing an FCS file.
 
-    Code is modified from cytopy data.read_write.py to:
+    Code is modified from cytopy
+    https://github.com/burtonrj/CytoPy/blob/master/cytopy/data/read_write.py
+    to:
     - allow reading in Path object
     - catch ValueError when reading in fcs using flowio.FlowData
     - catch ParserError in processing date
