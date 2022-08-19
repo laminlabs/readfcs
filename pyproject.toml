@@ -35,3 +35,8 @@ testpaths = [
     "tests",
     "docs",
 ]
+
+[tool.coverage.run]
+omit = [
+    "readfcs/*",
+]
