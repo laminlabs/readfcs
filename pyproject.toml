@@ -9,6 +9,7 @@ readme = "README.md"
 dynamic = ["version", "description"]
 dependencies = [
     "nbproject",
+    "lamin_logger",
     "flowio",
     "anndata",
 ]
@@ -32,5 +33,5 @@ preview = true
 [tool.pytest.ini_options]
 testpaths = [
     "tests",
-    "docs/guides",
+    "docs",
 ]
