@@ -52,7 +52,7 @@ class ReadFCS:
             spillover matrix is already linked to the file)
     """
 
-    def __init__(self, filepath, comp_matrix=None):
+    def __init__(self, filepath):
         # Added to allow reading in Path
         self._meta_raw, self._data = fcsparser.parse(filepath, reformat_meta=True)
 
@@ -81,22 +81,19 @@ class ReadFCS:
             self._meta["processing_date"] = None
 
         # compensation matrix
-        if comp_matrix is not None:
-            self._meta["spill"] = pd.read_csv(comp_matrix)
+        spill_list = [
+            self.meta.get(key)
+            for key in ["spill", "spillover"]
+            if self.meta.get(key) is not None
+        ]
+        if len(spill_list) > 0:
+            self.spill_txt = spill_list[0]
+            if len(self.spill_txt) > 0:
+                self._meta["spill"] = _get_spill_matrix(self.spill_txt)
         else:
-            spill_list = [
-                self.meta.get(key)
-                for key in ["spill", "spillover"]
-                if self.meta.get(key) is not None
-            ]
-            if len(spill_list) > 0:
-                self.spill_txt = spill_list[0]
-                if len(self.spill_txt) > 0:
-                    self._meta["spill"] = _get_spill_matrix(self.spill_txt)
-            else:
-                logger.warning(
-                    "No spillover matrix found, please provide path to relevant csv file with 'comp_matrix' argument if compensation is necessary"  # noqa
-                )
+            logger.warning(
+                "No spillover matrix found, please provide path to relevant csv file with 'comp_matrix' argument if compensation is necessary"  # noqa
+            )
 
     @property
     def meta(self):
@@ -168,20 +165,17 @@ class ReadFCS:
         return adata
 
 
-def read(filepath, comp_matrix=None, reindex=True) -> ad.AnnData:
+def read(filepath, reindex=True) -> ad.AnnData:
     """Read in fcs file as AnnData.
 
     Args:
         filepath: str or Path
             location of fcs file to parse
-        comp_matrix: str
-            csv file containing compensation matrix (optional, not required if a
-            spillover matrix is already linked to the file)
         reindex: bool
             variables will be reindexed with marker names if possible otherwise
             channels
     Returns:
         an AnnData object
     """
-    fcsfile = ReadFCS(filepath, comp_matrix=comp_matrix)
+    fcsfile = ReadFCS(filepath)
     return fcsfile.to_anndata(reindex=reindex)
