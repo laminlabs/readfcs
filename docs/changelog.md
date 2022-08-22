@@ -5,6 +5,7 @@
 <!-- prettier-ignore -->
 Name | PR | User | Date | Patch
 --- | --- | --- | --- | ---
+♻️ Clean up | [12](https://github.com/laminlabs/readfcs/pull/12) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-22 |
 👷 Add codecov | [11](https://github.com/laminlabs/readfcs/pull/11) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-19 |
 📝 Make the tutorials executed | [10](https://github.com/laminlabs/readfcs/pull/10) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-19 |
 🩹 Deals with spill is None | [9](https://github.com/laminlabs/readfcs/pull/9) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-09 | 0.1.5
