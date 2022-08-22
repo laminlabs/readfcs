@@ -1,5 +1,3 @@
-from pathlib import PosixPath
-
 import anndata as ad
 import dateutil.parser as date_parser  # type: ignore
 import fcsparser
@@ -56,8 +54,6 @@ class ReadFCS:
 
     def __init__(self, filepath, comp_matrix=None):
         # Added to allow reading in Path
-        if isinstance(filepath, PosixPath):
-            filepath = filepath.as_posix()
         self._meta_raw, self._data = fcsparser.parse(filepath, reformat_meta=True)
 
         self._meta = {
