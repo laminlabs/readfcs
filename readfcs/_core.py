@@ -2,35 +2,19 @@ from pathlib import PosixPath
 
 import anndata as ad
 import dateutil.parser as date_parser  # type: ignore
-import flowio
+import fcsparser
 import numpy as np
 import pandas as pd
 from lamin_logger import logger
 
 
-def chunks(df_list: list, n: int) -> pd.DataFrame:
-    """Yield successive n-sized chunks from l.
-
-    ref: https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks # noqa
-
-    Args:
-        df_list: list
-            list of DataFrames to generated 'chunks' from
-        n: int
-            number of chunks to generate
-
-    Returns:
-        Yields successive n-sized DataFrames
-    """
-    for i in range(0, len(df_list), n):
-        yield df_list[i : i + n]
+def _has_numbers(inputString):
+    """Check if a string contains any numbers."""
+    return any(char.isdigit() for char in inputString)
 
 
 def _get_spill_matrix(matrix_string: str) -> pd.DataFrame:
-    """Generate dataframe for spillover matrix.
-
-    Generate pandas dataframe for the fluorochrome spillover matrix used for
-    compensation calc
+    """Generate a spill matrix for string.
 
     Code is modified from: https://github.com/whitews/FlowUtils
     Pedersen NW, Chandran PA, Qian Y, et al. Automated Analysis of Flow Cytometry
@@ -59,41 +43,8 @@ def _get_spill_matrix(matrix_string: str) -> pd.DataFrame:
     return matrix_df
 
 
-def _get_channel_mappings(fluoro_dict: dict) -> list:
-    """Generate a list of dicts for fluorochrome mappings.
-
-    Code is modified from cytopy:
-    https://github.com/burtonrj/CytoPy/blob/master/cytopy/data/read_write.py
-
-    Args:
-        fluoro_dict: dict
-            dictionary object from the channels param of the fcs file
-
-    Returns:
-        List of dict obj with keys 'channel' and 'marker'.
-    """
-    fm = [(int(k), x) for k, x in fluoro_dict.items()]
-    fm = [x[1] for x in sorted(fm, key=lambda x: x[0])]
-    mappings = []
-    for fm_ in fm:
-        channel = fm_["PnN"].replace("_", "-")  # type: ignore
-        marker = ""
-        if "PnS" in fm_.keys():  # type: ignore
-            marker = fm_["PnS"].replace("_", "-")  # type: ignore
-        mappings.append({"channel": channel, "marker": marker})
-    return mappings
-
-
-class FCSFile:
-    """Utilising FlowIO to generate an object for representing an FCS file.
-
-    Code is modified from cytopy
-    https://github.com/burtonrj/CytoPy/blob/master/cytopy/data/read_write.py
-    to:
-    - allow reading in Path object
-    - catch ValueError when reading in fcs using flowio.FlowData
-    - catch ParserError in processing date
-    - fix the shape mismatch in .compensate()
+class ReadFCS:
+    """Read in fcs file using fcsparesr as preprocess the metadata.
 
     Args:
         filepath: str or Path
@@ -107,94 +58,81 @@ class FCSFile:
         # Added to allow reading in Path
         if isinstance(filepath, PosixPath):
             filepath = filepath.as_posix()
-        fcs = flowio.FlowData(filepath)
-        self._fcs = fcs
+        self._meta_raw, self._data = fcsparser.parse(filepath, reformat_meta=True)
 
-        # metadata from the fcs.text
-        self.filename = fcs.text.get("fil", "Unknown_filename")
-        self.sys = fcs.text.get("sys", "Unknown_system")
-        self.total_events = int(fcs.text.get("tot", 0))
-        self.tube_name = fcs.text.get("tube name", "Unknown")
-        self.exp_name = fcs.text.get("experiment name", "Unknown")
-        self.cytometer = fcs.text.get("cyt", "Unknown")
-        self.creator = fcs.text.get("creator", "Unknown")
-        self.operator = fcs.text.get("export user name", "Unknown")
-        self.cst_pass = fcs.text.get("cst setup status", "FAIL")
-        self.threshold = "Unknown"
+        self._meta = {
+            (k.replace("$", "") if _has_numbers(k) else k.replace("$", "").lower()): v
+            for k, v in self._meta_raw.items()
+        }
         self.spill_txt = None
         self.spill = None
 
-        # additional metadata
-        self.header = fcs.header
-        self.channel_mappings = _get_channel_mappings(fcs.channels)
-
-        # data
-        self.events = fcs.events
-        self.data = np.reshape(
-            np.array(fcs.events, dtype=np.float32), (-1, fcs.channel_count)
-        )
+        # header
+        self._meta["header"] = self.meta["__header__"]
+        self._meta["header"]["FCS format"] = self.meta["__header__"][
+            "FCS format"
+        ].decode()
 
         # channels
-        if "threshold" in fcs.text.keys():
-            self.threshold = [
-                {"channel": c, "threshold": v}
-                for c, v in chunks(fcs.text["threshold"].split(","), 2)
-            ]
+        self._meta["channels"] = self.meta["_channels_"]
 
+        # date
         try:
-            self.processing_date = date_parser.parse(
-                fcs.text["date"] + " " + fcs.text["etim"]
+            self._meta["processing_date"] = date_parser.parse(
+                self.meta["date"] + " " + self.meta["etim"]
             ).isoformat()
         except (KeyError, date_parser.ParserError):
-            self.processing_date = "Unknown"
+            self._meta["processing_date"] = None
 
         # compensation matrix
         if comp_matrix is not None:
-            self.spill = pd.read_csv(comp_matrix)
+            self._meta["spill"] = pd.read_csv(comp_matrix)
         else:
             spill_list = [
-                fcs.text.get(key)
+                self.meta.get(key)
                 for key in ["spill", "spillover"]
-                if fcs.text.get(key) is not None
+                if self.meta.get(key) is not None
             ]
             if len(spill_list) > 0:
                 self.spill_txt = spill_list[0]
                 if len(self.spill_txt) > 0:
-                    self.spill = _get_spill_matrix(self.spill_txt)
+                    self._meta["spill"] = _get_spill_matrix(self.spill_txt)
             else:
                 logger.warning(
                     "No spillover matrix found, please provide path to relevant csv file with 'comp_matrix' argument if compensation is necessary"  # noqa
                 )
 
+    @property
+    def meta(self):
+        """Metadata."""
+        return self._meta
+
+    @property
+    def data(self):
+        """Data matrix."""
+        return self._data
+
     def compensate(self):
         """Apply compensation to event data."""
         assert (
-            self.spill is not None
+            self.meta["spill"] is not None
         ), f"Unable to locate spillover matrix, please provide a compensation matrix"  # noqa
         channel_idx = [
-            i for i, x in enumerate(self.channel_mappings) if x["marker"] != ""
+            i
+            for i, (idx, row) in enumerate(self._meta["channels"].iterrows())
+            if row["$PnS"] not in ["", " "]
         ]
 
         channel_idx = [
             i
-            for i, x in enumerate(self.channel_mappings)
-            if all([z not in x["channel"].lower() for z in ["fsc", "ssc", "time"]])
-            and x["channel"] in self.spill.columns  # noqa
+            for i, (idx, row) in enumerate(self._meta["channels"].iterrows())
+            if all([z not in row["$PnN"].lower() for z in ["fsc", "ssc", "time"]])
+            and row["$PnN"] in self.meta["spill"].columns  # noqa
         ]
 
-        comp_data = self.data[:, channel_idx]
-        comp_data = np.linalg.solve(self.spill.values.T, comp_data.T).T
-        self.data[:, channel_idx] = comp_data
-
-    def write_fcs(self, filename, metadata=None):
-        """Export FCSFile instance as a new FCS file.
-
-        Args:
-            filename: name of exported FCS file
-            metadata: an optional dictionary for adding metadata keywords/values
-
-        """
-        self._fcs.write_fcs(filename=filename, metadata=metadata)
+        comp_data = self.data.iloc[:, channel_idx]
+        comp_data = np.linalg.solve(self.meta["spill"].values.T, comp_data.T).T
+        self._data.iloc[:, channel_idx] = comp_data
 
     def to_anndata(self, reindex=True) -> ad.AnnData:
         """Convert the FCSFile instance to an AnnData.
@@ -205,10 +143,18 @@ class FCSFile:
         Returns:
             an AnnData object
         """
+        channels_mapping = {
+            "$PnN": "channel",
+            "$PnS": "marker",
+        }
+
         adata = ad.AnnData(
             self.data,
-            var=pd.DataFrame(self.channel_mappings).set_index("channel"),
+            var=pd.DataFrame(
+                self._meta["channels"].rename(columns=channels_mapping)
+            ).set_index("channel"),
         )
+
         if reindex:
             adata.var = adata.var.reset_index()
             adata.var.index = np.where(
@@ -220,22 +166,8 @@ class FCSFile:
             if self.spill is not None:
                 self.spill.index = self.spill.index.map(mapper)
                 self.spill.columns = self.spill.columns.map(mapper)
-        meta = {
-            "filename": self.filename,
-            "sys": self.sys,
-            "header": self.header,
-            "total_events": self.total_events,
-            "tube_name": self.tube_name,
-            "exp_name": self.exp_name,
-            "cytometer": self.cytometer,
-            "creator": self.creator,
-            "operator": self.operator,
-            "cst_pass": self.cst_pass,
-            "threshold": self.threshold[0],
-            "processing_date": self.processing_date,
-            "spill": self.spill,
-        }
-        adata.uns["meta"] = meta
+
+        adata.uns["meta"] = self.meta
 
         return adata
 
@@ -255,5 +187,5 @@ def read(filepath, comp_matrix=None, reindex=True) -> ad.AnnData:
     Returns:
         an AnnData object
     """
-    fcsfile = FCSFile(filepath, comp_matrix=comp_matrix)
+    fcsfile = ReadFCS(filepath, comp_matrix=comp_matrix)
     return fcsfile.to_anndata(reindex=reindex)
