@@ -45,9 +45,6 @@ class ReadFCS:
     Args:
         filepath: str or Path
             location of fcs file to parse
-        comp_matrix: str
-            csv file containing compensation matrix (optional, not required if a
-            spillover matrix is already linked to the file)
     """
 
     def __init__(self, filepath):

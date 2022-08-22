@@ -14,7 +14,7 @@ This is the complete API reference:
    datasets
 """
 
-__version__ = "0.1.8"
+__version__ = "1.0.0"
 
 from . import datasets
 from ._core import ReadFCS, read
