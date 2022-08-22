@@ -1,5 +1,5 @@
 project_name: readfcs
-description: Read fcs files
+description: Read FCS files
 project_slug: readfcs
 repository_name: readfcs
 package_name: readfcs
