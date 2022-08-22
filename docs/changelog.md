@@ -5,6 +5,7 @@
 <!-- prettier-ignore -->
 Name | PR | User | Date | Patch
 --- | --- | --- | --- | ---
+♻️ Rewrote readfcs based on fcsparser | [15](https://github.com/laminlabs/readfcs/pull/15) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-22 |
 🍱 Added another dataset | [14](https://github.com/laminlabs/readfcs/pull/14) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-22 | 0.1.6
 🎨 Improve coverage | [13](https://github.com/laminlabs/readfcs/pull/13) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-22 |
 ♻️ Clean up | [12](https://github.com/laminlabs/readfcs/pull/12) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-22 |
