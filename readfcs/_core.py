@@ -107,10 +107,7 @@ class FCSFile:
         # Added to allow reading in Path
         if isinstance(filepath, PosixPath):
             filepath = filepath.as_posix()
-        try:
-            fcs = flowio.FlowData(filepath)
-        except ValueError:
-            fcs = flowio.FlowData(filepath, ignore_offset_error=True)
+        fcs = flowio.FlowData(filepath)
         self._fcs = fcs
 
         # metadata from the fcs.text
