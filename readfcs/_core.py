@@ -77,10 +77,9 @@ def _get_channel_mappings(fluoro_dict: dict) -> list:
     mappings = []
     for fm_ in fm:
         channel = fm_["PnN"].replace("_", "-")  # type: ignore
+        marker = ""
         if "PnS" in fm_.keys():  # type: ignore
             marker = fm_["PnS"].replace("_", "-")  # type: ignore
-        else:
-            marker = ""
         mappings.append({"channel": channel, "marker": marker})
     return mappings
 
@@ -123,11 +122,14 @@ class FCSFile:
         self.cytometer = fcs.text.get("cyt", "Unknown")
         self.creator = fcs.text.get("creator", "Unknown")
         self.operator = fcs.text.get("export user name", "Unknown")
+        self.cst_pass = fcs.text.get("cst setup status", "FAIL")
+        self.threshold = "Unknown"
+        self.spill_txt = None
+        self.spill = None
 
         # additional metadata
         self.header = fcs.header
         self.channel_mappings = _get_channel_mappings(fcs.channels)
-        self.cst_pass = False
 
         # data
         self.events = fcs.events
@@ -141,8 +143,7 @@ class FCSFile:
                 {"channel": c, "threshold": v}
                 for c, v in chunks(fcs.text["threshold"].split(","), 2)
             ]
-        else:
-            self.threshold = "Unknown"
+
         try:
             self.processing_date = date_parser.parse(
                 fcs.text["date"] + " " + fcs.text["etim"]
@@ -153,28 +154,20 @@ class FCSFile:
         # compensation matrix
         if comp_matrix is not None:
             self.spill = pd.read_csv(comp_matrix)
-            self.spill_txt = None
         else:
             spill_list = [
                 fcs.text.get(key)
                 for key in ["spill", "spillover"]
                 if fcs.text.get(key) is not None
             ]
-            self.spill_txt = None if len(spill_list) == 0 else spill_list[0]
-
-            if self.spill_txt is not None:
-                if len(self.spill_txt) == 0:
-                    logger.warning(
-                        "No spillover matrix found, please provide path to relevant csv file with 'comp_matrix' argument if compensation is necessary"  # noqa
-                    )
-                    self.spill = None
-                else:
+            if len(spill_list) > 0:
+                self.spill_txt = spill_list[0]
+                if len(self.spill_txt) > 0:
                     self.spill = _get_spill_matrix(self.spill_txt)
             else:
-                self.spill = None
-        if "cst_setup_status" in fcs.text:
-            if fcs.text["cst setup status"] == "SUCCESS":
-                self.cst_pass = True
+                logger.warning(
+                    "No spillover matrix found, please provide path to relevant csv file with 'comp_matrix' argument if compensation is necessary"  # noqa
+                )
 
     def compensate(self):
         """Apply compensation to event data."""
@@ -233,6 +226,7 @@ class FCSFile:
         meta = {
             "filename": self.filename,
             "sys": self.sys,
+            "header": self.header,
             "total_events": self.total_events,
             "tube_name": self.tube_name,
             "exp_name": self.exp_name,
