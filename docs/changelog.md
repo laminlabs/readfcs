@@ -5,6 +5,7 @@
 <!-- prettier-ignore -->
 Name | PR | User | Date | Patch
 --- | --- | --- | --- | ---
+🍱 Added another dataset | [14](https://github.com/laminlabs/readfcs/pull/14) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-22 |
 🎨 Improve coverage | [13](https://github.com/laminlabs/readfcs/pull/13) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-22 |
 ♻️ Clean up | [12](https://github.com/laminlabs/readfcs/pull/12) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-22 |
 👷 Add codecov | [11](https://github.com/laminlabs/readfcs/pull/11) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-19 |
