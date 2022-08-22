@@ -10,11 +10,11 @@ This is the complete API reference:
    :toctree: .
 
    read
-   FCSFile
+   ReadFCS
    datasets
 """
 
 __version__ = "0.1.6"
 
 from . import datasets
-from ._core import FCSFile, read
+from ._core import ReadFCS, read
