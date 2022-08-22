@@ -5,6 +5,7 @@ import dateutil.parser as date_parser  # type: ignore
 import flowio
 import numpy as np
 import pandas as pd
+from lamin_logger import logger
 
 
 def chunks(df_list: list, n: int) -> pd.DataFrame:
@@ -69,7 +70,7 @@ def _get_channel_mappings(fluoro_dict: dict) -> list:
             dictionary object from the channels param of the fcs file
 
     Returns:
-        List of dict obj with keys 'channel' and 'marker'. Use to map fluorochrome channels to corresponding marker # noqa
+        List of dict obj with keys 'channel' and 'marker'.
     """
     fm = [(int(k), x) for k, x in fluoro_dict.items()]
     fm = [x[1] for x in sorted(fm, key=lambda x: x[0])]
@@ -112,6 +113,8 @@ class FCSFile:
         except ValueError:
             fcs = flowio.FlowData(filepath, ignore_offset_error=True)
         self._fcs = fcs
+
+        # metadata from the fcs.text
         self.filename = fcs.text.get("fil", "Unknown_filename")
         self.sys = fcs.text.get("sys", "Unknown_system")
         self.total_events = int(fcs.text.get("tot", 0))
@@ -120,12 +123,19 @@ class FCSFile:
         self.cytometer = fcs.text.get("cyt", "Unknown")
         self.creator = fcs.text.get("creator", "Unknown")
         self.operator = fcs.text.get("export user name", "Unknown")
+
+        # additional metadata
+        self.header = fcs.header
         self.channel_mappings = _get_channel_mappings(fcs.channels)
         self.cst_pass = False
-        self.data = fcs.events
-        self.event_data = np.reshape(
+
+        # data
+        self.events = fcs.events
+        self.data = np.reshape(
             np.array(fcs.events, dtype=np.float32), (-1, fcs.channel_count)
         )
+
+        # channels
         if "threshold" in fcs.text.keys():
             self.threshold = [
                 {"channel": c, "threshold": v}
@@ -139,22 +149,23 @@ class FCSFile:
             ).isoformat()
         except (KeyError, date_parser.ParserError):
             self.processing_date = "Unknown"
+
+        # compensation matrix
         if comp_matrix is not None:
             self.spill = pd.read_csv(comp_matrix)
             self.spill_txt = None
         else:
-            if "spill" in fcs.text.keys():
-                self.spill_txt = fcs.text["spill"]
+            spill_list = [
+                fcs.text.get(key)
+                for key in ["spill", "spillover"]
+                if fcs.text.get(key) is not None
+            ]
+            self.spill_txt = None if len(spill_list) == 0 else spill_list[0]
 
-            elif "spillover" in fcs.text.keys():
-                self.spill_txt = fcs.text["spillover"]
-            else:
-                self.spill_txt = None
             if self.spill_txt is not None:
-                if (len(self.spill_txt)) < 1:
-                    print(
-                        """Warning: no spillover matrix found, please provide
-                    path to relevant csv file with 'comp_matrix' argument if compensation is necessary"""  # noqa
+                if len(self.spill_txt) == 0:
+                    logger.warning(
+                        "No spillover matrix found, please provide path to relevant csv file with 'comp_matrix' argument if compensation is necessary"  # noqa
                     )
                     self.spill = None
                 else:
@@ -181,9 +192,9 @@ class FCSFile:
             and x["channel"] in self.spill.columns  # noqa
         ]
 
-        comp_data = self.event_data[:, channel_idx]
+        comp_data = self.data[:, channel_idx]
         comp_data = np.linalg.solve(self.spill.values.T, comp_data.T).T
-        self.event_data[:, channel_idx] = comp_data
+        self.data[:, channel_idx] = comp_data
 
     def write_fcs(self, filename, metadata=None):
         """Export FCSFile instance as a new FCS file.
@@ -205,7 +216,7 @@ class FCSFile:
             an AnnData object
         """
         adata = ad.AnnData(
-            self.event_data,
+            self.data,
             var=pd.DataFrame(self.channel_mappings).set_index("channel"),
         )
         if reindex:
