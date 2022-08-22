@@ -1,9 +1,7 @@
 import anndata as ad
-import dateutil.parser as date_parser  # type: ignore
 import fcsparser
 import numpy as np
 import pandas as pd
-from lamin_logger import logger
 
 
 def _has_numbers(inputString):
@@ -72,14 +70,6 @@ class ReadFCS:
         # channels
         self._meta["channels"] = self.meta["_channels_"]
 
-        # date
-        try:
-            self._meta["processing_date"] = date_parser.parse(
-                self.meta["date"] + " " + self.meta["etim"]
-            ).isoformat()
-        except (KeyError, date_parser.ParserError):
-            self._meta["processing_date"] = None
-
         # compensation matrix
         spill_list = [
             self.meta.get(key)
@@ -90,10 +80,6 @@ class ReadFCS:
             self.spill_txt = spill_list[0]
             if len(self.spill_txt) > 0:
                 self._meta["spill"] = _get_spill_matrix(self.spill_txt)
-        else:
-            logger.warning(
-                "No spillover matrix found, please provide path to relevant csv file with 'comp_matrix' argument if compensation is necessary"  # noqa
-            )
 
     @property
     def meta(self):
