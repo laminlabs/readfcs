@@ -156,9 +156,9 @@ class ReadFCS:
                 adata.var["marker"],
             )
             mapper = pd.Series(adata.var.index, index=adata.var["channel"])
-            if self.spill is not None:
-                self.spill.index = self.spill.index.map(mapper)
-                self.spill.columns = self.spill.columns.map(mapper)
+            if self.meta["spill"] is not None:
+                self._meta["spill"].index = self.meta["spill"].index.map(mapper)
+                self._meta["spill"].columns = self.meta["spill"].columns.map(mapper)
 
         adata.uns["meta"] = self.meta
 
