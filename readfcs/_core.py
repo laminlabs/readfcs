@@ -144,6 +144,9 @@ class ReadFCS:
                 self._meta["spill"].columns = self.meta["spill"].columns.map(mapper)
 
         adata.uns["meta"] = self.meta
+        adata.uns["meta"]["_channel_names_"] = list(
+            adata.uns["meta"]["_channel_names_"]
+        )
 
         return adata
 

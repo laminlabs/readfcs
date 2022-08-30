@@ -107,3 +107,4 @@ lamin_sphinx
 docs/conf.py
 _docs_tmp*
 *.fcs
+*.h5ad
