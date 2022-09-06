@@ -124,13 +124,21 @@ class ReadFCS:
             "$PnS": "marker",
         }
 
+        # AnnData only allows str index
+        var = self._meta["channels"]
+        X = self._data
+        var.index = var.index.astype(str)
+        X.columns = var.index
+        X.index = X.index.astype(str)
+
+        # create anndata with channel indexing variables
         adata = ad.AnnData(
-            self.data,
-            var=pd.DataFrame(
-                self._meta["channels"].rename(columns=channels_mapping)
-            ).set_index("channel"),
+            X,
+            var=var.rename(columns=channels_mapping),
         )
 
+        # by default, we index variables with marker
+        # use channels for non-marker channels
         if reindex:
             adata.var = adata.var.reset_index()
             adata.var.index = np.where(
@@ -139,7 +147,7 @@ class ReadFCS:
                 adata.var["marker"],
             )
             mapper = pd.Series(adata.var.index, index=adata.var["channel"])
-            if self.meta["spill"] is not None:
+            if self.meta.get("spill") is not None:
                 self._meta["spill"].index = self.meta["spill"].index.map(mapper)
                 self._meta["spill"].columns = self.meta["spill"].columns.map(mapper)
 
