@@ -3,7 +3,7 @@
 <!-- prettier-ignore -->
 Name | PR | Developer | Date | Version
 --- | --- | --- | --- | ---
-🩹 Convert list columns to str so it saves properly | [19](https://github.com/laminlabs/readfcs/pull/19) | [sunnyosun](https://github.com/sunnyosun) | 2022-09-08 |
+🩹 Convert list columns to str so it saves properly | [19](https://github.com/laminlabs/readfcs/pull/19) | [sunnyosun](https://github.com/sunnyosun) | 2022-09-08 | 1.0.3
 🩹 Make sure `anndata` index is str | [18](https://github.com/laminlabs/readfcs/pull/18) | [sunnyosun](https://github.com/sunnyosun) | 2022-09-06 | 1.0.2
 🐛 Change `_channel_names_` to list for saving error | [17](https://github.com/laminlabs/readfcs/pull/17) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-30 | 1.0.1
 🎨 Get coverage to 100% | [16](https://github.com/laminlabs/readfcs/pull/16) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-22 | 1.0.0
