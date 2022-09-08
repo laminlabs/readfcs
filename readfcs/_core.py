@@ -131,6 +131,11 @@ class ReadFCS:
         X.columns = var.index
         X.index = X.index.astype(str)
 
+        # convert list columns to str so it saves properly
+        for k in var.columns:
+            if isinstance(var[k].iloc[0], list):
+                var[k] = var[k].map(repr)
+
         # create anndata with channel indexing variables
         adata = ad.AnnData(
             X,
