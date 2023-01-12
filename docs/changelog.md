@@ -3,7 +3,7 @@
 <!-- prettier-ignore -->
 Name | PR | Developer | Date | Version
 --- | --- | --- | --- | ---
-👷 Extend CI to py3.8-3.10 | [20](https://github.com/laminlabs/readfcs/pull/20) | [sunnyosun](https://github.com/sunnyosun) | 2023-01-12 |
+👷 Extend CI to py3.8-3.10 | [20](https://github.com/laminlabs/readfcs/pull/20) | [sunnyosun](https://github.com/sunnyosun) | 2023-01-12 | 1.0.4
 🩹 Convert list columns to str so it saves properly | [19](https://github.com/laminlabs/readfcs/pull/19) | [sunnyosun](https://github.com/sunnyosun) | 2022-09-08 | 1.0.3
 🩹 Make sure `anndata` index is str | [18](https://github.com/laminlabs/readfcs/pull/18) | [sunnyosun](https://github.com/sunnyosun) | 2022-09-06 | 1.0.2
 🐛 Change `_channel_names_` to list for saving error | [17](https://github.com/laminlabs/readfcs/pull/17) | [sunnyosun](https://github.com/sunnyosun) | 2022-08-30 | 1.0.1
