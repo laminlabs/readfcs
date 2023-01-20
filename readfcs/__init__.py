@@ -11,6 +11,7 @@ This is the complete API reference:
 
    read
    ReadFCS
+   view
    datasets
 """
 
