@@ -8,6 +8,51 @@ import numpy as np
 import pandas as pd
 
 
+def _channels_to_df(meta_raw: dict) -> dict:
+    """Format channels into a DataFrame.
+
+    Args:
+    meta_raw: dict
+        original metadata
+
+    Returns:
+        a dict of metadata with "channels"
+    """
+    meta = {}
+    channel_groups: Dict = {}
+
+    # channel groups are $PnB, $PnS, $PnN...
+    for k, v in meta_raw.items():
+        # Get all fields with $PnX pattern
+        if re.match("^\$P\d+[A-Z]$", k):  # noqa
+            group_key = f"$Pn{k[-1]}"
+            if group_key not in channel_groups:
+                channel_groups[group_key] = []
+            # The numeric index n
+            idx = int(k.lstrip("$P")[:-1])
+            channel_groups[group_key].append((idx, v))
+        else:
+            meta[k] = v
+
+    # format channels into a dataframe
+    k = "$PnN"
+    df_groups = pd.DataFrame(channel_groups.get(k), columns=["n", k]).set_index("n")
+
+    for k, group in channel_groups.items():
+        if k == "$PnN":
+            continue
+        df_group = pd.DataFrame(channel_groups.get(k), columns=["n", k]).set_index("n")
+        df_groups = df_groups.join(df_group)
+
+    # reorder df_groups columns
+    df_groups.insert(0, "$PnN", df_groups.pop("$PnN"))
+    if "$PnS" in df_groups.columns:
+        df_groups.insert(1, "$PnS", df_groups.pop("$PnS"))
+    meta["channels"] = df_groups
+
+    return meta
+
+
 def _get_spill_matrix(matrix_string: str) -> pd.DataFrame:
     """Generate a spill matrix for string.
 
@@ -55,7 +100,7 @@ class ReadFCS:
         )
 
         # Format channels into a dataframe as `self.meta["channels"]`
-        self._channels_to_df()
+        self._meta = _channels_to_df(self._meta_raw)
 
         # header
         self._meta["header"] = self.meta["__header__"]
@@ -95,38 +140,6 @@ class ReadFCS:
     def data(self) -> pd.DataFrame:
         """Data matrix."""
         return self._data
-
-    def _channels_to_df(self) -> None:
-        """Format channels into a DataFrame."""
-        self._meta = {}
-        channel_groups: Dict = {}
-
-        # channel groups are $PnB, $PnS, $PnN...
-        for k, v in self._meta_raw.items():
-            # Get all fields with $PnX pattern
-            if re.match("^\$P\d+[A-Z]$", k):  # noqa
-                group_key = f"$Pn{k[-1]}"
-                if group_key not in channel_groups:
-                    channel_groups[group_key] = []
-                # The numeric index n
-                idx = int(k.lstrip("$P")[:-1])
-                channel_groups[group_key].append((idx, v))
-            else:
-                self._meta[k] = v
-
-        # format channels into a dataframe
-        k = "$PnN"
-        df_groups = pd.DataFrame(channel_groups.get(k), columns=["n", k]).set_index("n")
-
-        for k, group in channel_groups.items():
-            if k == "$PnN":
-                continue
-            df_group = pd.DataFrame(channel_groups.get(k), columns=["n", k]).set_index(
-                "n"
-            )
-            df_groups = df_groups.join(df_group)
-
-        self._meta["channels"] = df_groups
 
     def compensate(self) -> None:
         """Apply compensation to event data."""
