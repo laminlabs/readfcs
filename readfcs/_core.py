@@ -44,9 +44,6 @@ class ReadFCS:
     Args:
         filepath: str or Path
             location of fcs file to parse
-        channel_naming: "$PnN"
-            Determines which metadata field is used for naming the channels.
-            This should be unique.
         data_set: int
             Index of retrieved data set in the fcs file.
     """
@@ -54,9 +51,7 @@ class ReadFCS:
     def __init__(self, filepath: Union[str, Path], data_set: int = 0) -> None:
         # No metadata formating using fcsparser
         self._meta_raw, self._data = fcsparser.parse(
-            filepath,
-            reformat_meta=False,
-            data_set=data_set,
+            filepath, data_set=data_set, channel_naming="$PnN"
         )
 
         # Format channels into a dataframe as `self.meta["channels"]`
@@ -71,6 +66,10 @@ class ReadFCS:
         # compensation matrix
         self.spill_txt = None
         self.spill = None
+        if "SPILL" in self.meta:
+            self._meta["spill"] = self._meta.pop("SPILL")
+        if "SPILLOVER" in self.meta:
+            self._meta["spillover"] = self._meta.pop("SPILLOVER")
 
         spill_list = [
             self.meta.get(key)
@@ -149,7 +148,7 @@ class ReadFCS:
 
         comp_data = self.data.iloc[:, channel_idx]
         comp_data = np.linalg.solve(self.meta["spill"].values.T, comp_data.T).T
-        self._data.iloc[:, channel_idx] = comp_data
+        self._data[self._data.columns[channel_idx]] = comp_data
 
     def to_anndata(self, reindex=True) -> ad.AnnData:
         """Convert the FCSFile instance to an AnnData.
@@ -202,6 +201,8 @@ class ReadFCS:
                 self._meta["spill"].index = self.meta["spill"].index.map(mapper)
                 self._meta["spill"].columns = self.meta["spill"].columns.map(mapper)
 
+        # write metadata into adata.uns
+        adata.uns["meta"] = self.meta
         return adata
 
 
@@ -237,4 +238,5 @@ def view(filepath: Union[str, Path], data_set: int = 0):
 
     See `fcsparser.parse`: https://github.com/eyurtsev/fcsparser
     """
-    return fcsparser.parse(filepath, reformat_meta=False, data_set=data_set)
+    meta, data = fcsparser.parse(filepath, data_set=data_set, channel_naming="$PnN")
+    return meta, data
