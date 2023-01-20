@@ -1,12 +1,11 @@
+import re
+from pathlib import Path
+from typing import Dict, Union
+
 import anndata as ad
 import fcsparser
 import numpy as np
 import pandas as pd
-
-
-def _has_numbers(inputString):
-    """Check if a string contains any numbers."""
-    return any(char.isdigit() for char in inputString)
 
 
 def _get_spill_matrix(matrix_string: str) -> pd.DataFrame:
@@ -45,18 +44,23 @@ class ReadFCS:
     Args:
         filepath: str or Path
             location of fcs file to parse
+        channel_naming: "$PnN"
+            Determines which metadata field is used for naming the channels.
+            This should be unique.
+        data_set: int
+            Index of retrieved data set in the fcs file.
     """
 
-    def __init__(self, filepath):
-        # Added to allow reading in Path
-        self._meta_raw, self._data = fcsparser.parse(filepath, reformat_meta=True)
+    def __init__(self, filepath: Union[str, Path], data_set: int = 0) -> None:
+        # No metadata formating using fcsparser
+        self._meta_raw, self._data = fcsparser.parse(
+            filepath,
+            reformat_meta=False,
+            data_set=data_set,
+        )
 
-        self._meta = {
-            (k.replace("$", "") if _has_numbers(k) else k.replace("$", "").lower()): v
-            for k, v in self._meta_raw.items()
-        }
-        self.spill_txt = None
-        self.spill = None
+        # Format channels into a dataframe as `self.meta["channels"]`
+        self._channels_to_df()
 
         # header
         self._meta["header"] = self.meta["__header__"]
@@ -64,10 +68,10 @@ class ReadFCS:
             "FCS format"
         ].decode()
 
-        # channels
-        self._meta["channels"] = self.meta["_channels_"]
-
         # compensation matrix
+        self.spill_txt = None
+        self.spill = None
+
         spill_list = [
             self.meta.get(key)
             for key in ["spill", "spillover"]
@@ -75,20 +79,57 @@ class ReadFCS:
         ]
         if len(spill_list) > 0:
             self.spill_txt = spill_list[0]
-            if len(self.spill_txt) > 0:
-                self._meta["spill"] = _get_spill_matrix(self.spill_txt)
+            if len(self.spill_txt) > 0:  # type:ignore
+                self._meta["spill"] = _get_spill_matrix(self.spill_txt)  # type:ignore
 
     @property
-    def meta(self):
+    def header(self) -> dict:
+        """Header."""
+        return self._meta["header"]
+
+    @property
+    def meta(self) -> dict:
         """Metadata."""
         return self._meta
 
     @property
-    def data(self):
+    def data(self) -> pd.DataFrame:
         """Data matrix."""
         return self._data
 
-    def compensate(self):
+    def _channels_to_df(self) -> None:
+        """Format channels into a DataFrame."""
+        self._meta = {}
+        channel_groups: Dict = {}
+
+        # channel groups are $PnB, $PnS, $PnN...
+        for k, v in self._meta_raw.items():
+            # Get all fields with $PnX pattern
+            if re.match("^\$P\d+[A-Z]$", k):  # noqa
+                group_key = f"$Pn{k[-1]}"
+                if group_key not in channel_groups:
+                    channel_groups[group_key] = []
+                # The numeric index n
+                idx = int(k.lstrip("$P")[:-1])
+                channel_groups[group_key].append((idx, v))
+            else:
+                self._meta[k] = v
+
+        # format channels into a dataframe
+        k = "$PnN"
+        df_groups = pd.DataFrame(channel_groups.get(k), columns=["n", k]).set_index("n")
+
+        for k, group in channel_groups.items():
+            if k == "$PnN":
+                continue
+            df_group = pd.DataFrame(channel_groups.get(k), columns=["n", k]).set_index(
+                "n"
+            )
+            df_groups = df_groups.join(df_group)
+
+        self._meta["channels"] = df_groups
+
+    def compensate(self) -> None:
         """Apply compensation to event data."""
         assert (
             self.meta["spill"] is not None
@@ -123,6 +164,11 @@ class ReadFCS:
             "$PnN": "channel",
             "$PnS": "marker",
         }
+        if any([i for i in ["$PnN", "$PnS"] if i not in self.meta["channels"].columns]):
+            raise AssertionError(
+                "$PnN or $PnS field not found in the file!\nPlease check your file"
+                " content with `readfcs.view`!"
+            )
 
         # AnnData only allows str index
         var = self._meta["channels"]
@@ -147,7 +193,7 @@ class ReadFCS:
         if reindex:
             adata.var = adata.var.reset_index()
             adata.var.index = np.where(
-                adata.var["marker"].isin(["", " "]),
+                adata.var["marker"].isin(["", " ", np.nan]),
                 adata.var["channel"],
                 adata.var["marker"],
             )
@@ -155,11 +201,6 @@ class ReadFCS:
             if self.meta.get("spill") is not None:
                 self._meta["spill"].index = self.meta["spill"].index.map(mapper)
                 self._meta["spill"].columns = self.meta["spill"].columns.map(mapper)
-
-        adata.uns["meta"] = self.meta
-        adata.uns["meta"]["_channel_names_"] = list(
-            adata.uns["meta"]["_channel_names_"]
-        )
 
         return adata
 
@@ -178,3 +219,22 @@ def read(filepath, reindex=True) -> ad.AnnData:
     """
     fcsfile = ReadFCS(filepath)
     return fcsfile.to_anndata(reindex=reindex)
+
+
+def view(filepath: Union[str, Path], data_set: int = 0):
+    """Read in file content without preprocessing for debugging.
+
+    Args:
+        filepath: str or Path
+            location of fcs file to parse
+        data_set: int
+            Index of retrieved data set in the fcs file.
+
+    Returns:
+        a tuple of (data, metadata)
+        - data is a DataFrame
+        - metadata is a dictionary
+
+    See `fcsparser.parse`: https://github.com/eyurtsev/fcsparser
+    """
+    return fcsparser.parse(filepath, reformat_meta=False, data_set=data_set)

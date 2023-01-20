@@ -22,4 +22,4 @@ from lamin_logger import py_version_warning
 py_version_warning("3.7", "3.10")
 
 from . import datasets
-from ._core import ReadFCS, read
+from ._core import ReadFCS, read, view
