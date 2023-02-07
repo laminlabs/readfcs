@@ -3,6 +3,8 @@
 [![pypi](https://img.shields.io/pypi/v/readfcs?color=blue&label=pypi%20package)](https://pypi.org/project/readfcs)
 [![doi](https://img.shields.io/badge/doi-10.56528%2Frfcs-lightgrey)](https://doi.org/10.56528/rfcs)
 
-# readfcs: Read FCS files into AnnData
+# readfcs: Read FCS files
 
-Read the [docs](https://lamin.ai/docs/readfcs).
+__A lightweight open-source Python package that loads data and metadata from Flow Cytometry Standard (FCS) files into DataFrame and AnnData objects.__
+
+Read the [docs](https://lamin.ai/docs/readfcs), [report](https://lamin.ai/reports/2022/readfcs).
