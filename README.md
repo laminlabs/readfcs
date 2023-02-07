@@ -5,6 +5,6 @@
 
 # readfcs: Read FCS files
 
-__A lightweight open-source Python package that loads data and metadata from Flow Cytometry Standard (FCS) files into DataFrame and AnnData objects.__
+_A lightweight open-source Python package that loads data and metadata from Flow Cytometry Standard (FCS) files into DataFrame and AnnData objects._
 
 Read the [docs](https://lamin.ai/docs/readfcs), [report](https://lamin.ai/reports/2022/readfcs).
