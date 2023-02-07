@@ -48,6 +48,8 @@ def _channels_to_df(meta_raw: dict) -> dict:
     df_groups.insert(0, "$PnN", df_groups.pop("$PnN"))
     if "$PnS" in df_groups.columns:
         df_groups.insert(1, "$PnS", df_groups.pop("$PnS"))
+    # convert nan to '' otherwise saving to anndata will error
+    df_groups.fillna("", inplace=True)
     meta["channels"] = df_groups
 
     return meta
@@ -205,7 +207,7 @@ class ReadFCS:
         if reindex:
             adata.var = adata.var.reset_index()
             adata.var.index = np.where(
-                adata.var["marker"].isin(["", " ", np.nan]),
+                adata.var["marker"].isin(["", " "]),
                 adata.var["channel"],
                 adata.var["marker"],
             )
