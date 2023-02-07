@@ -3,6 +3,6 @@
 [![pypi](https://img.shields.io/pypi/v/readfcs?color=blue&label=pypi%20package)](https://pypi.org/project/readfcs)
 [![doi](https://img.shields.io/badge/doi-10.56528%2Frfcs-lightgrey)](https://doi.org/10.56528/rfcs)
 
-# readfcs: Read FCS files
+# readfcs: Read FCS files into AnnData
 
 Read the [docs](https://lamin.ai/docs/readfcs).
