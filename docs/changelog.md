@@ -3,7 +3,7 @@
 <!-- prettier-ignore -->
 Name | PR | Developer | Date | Version
 --- | --- | --- | --- | ---
-➖ Remove nbproject from dependencies | [25](https://github.com/laminlabs/readfcs/pull/25) | [Koncopd](https://github.com/Koncopd) | 2023-06-04 |
+➖ Remove nbproject from dependencies | [25](https://github.com/laminlabs/readfcs/pull/25) | [Koncopd](https://github.com/Koncopd) | 2023-06-04 | 1.1.2
 💚 Fix docs | [23](https://github.com/laminlabs/readfcs/pull/23) | [sunnyosun](https://github.com/sunnyosun) | 2023-02-07 |
 🩹 Fill nan with empty string in channels | [22](https://github.com/laminlabs/readfcs/pull/22) | [sunnyosun](https://github.com/sunnyosun) | 2023-02-07 | 1.1.1
 🚑 Wrote new channels formater | [21](https://github.com/laminlabs/readfcs/pull/21) | [sunnyosun](https://github.com/sunnyosun) | 2023-01-20 | 1.1.0
