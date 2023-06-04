@@ -15,7 +15,6 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
 ]
 dependencies = [
-    "nbproject",
     "lamin_logger",
     "fcsparser",
     "anndata",
@@ -33,6 +32,7 @@ test = [
     "pytest>=6.0",
     "pytest-cov",
     "nbmake",
+    "nbproject-test",
 ]
 
 [tool.black]
