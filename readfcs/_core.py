@@ -41,7 +41,7 @@ def _channels_to_df(meta_raw: dict) -> dict:
     for k, group in channel_groups.items():
         if k == "$PnN":
             continue
-        df_group = pd.DataFrame(channel_groups.get(k), columns=["n", k]).set_index("n")
+        df_group = pd.DataFrame(group, columns=["n", k]).set_index("n")
         df_groups = df_groups.join(df_group)
 
     # reorder df_groups columns
@@ -50,7 +50,8 @@ def _channels_to_df(meta_raw: dict) -> dict:
         df_groups.insert(1, "$PnS", df_groups.pop("$PnS"))
     # convert nan to '' otherwise saving to anndata will error
     df_groups.fillna("", inplace=True)
-    meta["channels"] = df_groups
+    # make sure channels are sorted by n
+    meta["channels"] = df_groups.sort_index()
 
     return meta
 
