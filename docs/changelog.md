@@ -3,6 +3,7 @@
 <!-- prettier-ignore -->
 Name | PR | Developer | Date | Version
 --- | --- | --- | --- | ---
+🚑️ Make sure channels are sorted by n | [29](https://github.com/laminlabs/readfcs/pull/29) | [sunnyosun](https://github.com/sunnyosun) | 2023-07-07 |
 🩹 Remove whitespace only markers | [26](https://github.com/laminlabs/readfcs/pull/26) | [sunnyosun](https://github.com/sunnyosun) | 2023-06-27 | 1.1.3
 ➖ Remove nbproject from dependencies | [25](https://github.com/laminlabs/readfcs/pull/25) | [Koncopd](https://github.com/Koncopd) | 2023-06-04 | 1.1.2
 💚 Fix docs | [23](https://github.com/laminlabs/readfcs/pull/23) | [sunnyosun](https://github.com/sunnyosun) | 2023-02-07 |
