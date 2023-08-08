@@ -207,7 +207,7 @@ class ReadFCS:
         # use channels for non-marker channels
         if reindex:
             adata.var = adata.var.reset_index()
-            adata.var.replace({" ", ""}, inplace=True)
+            adata.var.replace({" ": ""}, inplace=True)
             adata.var.index = np.where(
                 adata.var["marker"] == "",
                 adata.var["channel"],
