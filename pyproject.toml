@@ -30,6 +30,7 @@ dev = [
     "pytest>=6.0",
     "pytest-cov",
     "nbproject-test",
+    "laminci",
 ]
 
 [tool.black]
