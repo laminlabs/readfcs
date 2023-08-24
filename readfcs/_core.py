@@ -215,8 +215,13 @@ class ReadFCS:
             )
             mapper = pd.Series(adata.var.index, index=adata.var["channel"])
             if self.meta.get("spill") is not None:
-                self._meta["spill"].index = self.meta["spill"].index.map(mapper)
-                self._meta["spill"].columns = self.meta["spill"].columns.map(mapper)
+                n_mismatch = self._meta["spill"].index.map(mapper).isna().sum()
+                if n_mismatch > 0:
+                    raise AssertionError(
+                        f"spill matrix index contains {n_mismatch} mismatches to the channels, please check your metadata."  # noqa
+                    )
+                self._meta["spill"].rename(index=mapper, inplace=True)
+                self._meta["spill"].rename(columns=mapper, inplace=True)
 
         # write metadata into adata.uns
         adata.uns["meta"] = self.meta

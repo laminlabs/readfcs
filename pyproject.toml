@@ -15,7 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
 ]
 dependencies = [
-    "lamin_logger",
+    "lamin_utils",
     "fcsparser",
     "anndata",
 ]
@@ -27,12 +27,10 @@ Home = "https://github.com/laminlabs/readfcs"
 dev = [
     "pre-commit",
     "nox",
-]
-test = [
     "pytest>=6.0",
     "pytest-cov",
-    "nbmake",
     "nbproject-test",
+    "laminci",
 ]
 
 [tool.black]

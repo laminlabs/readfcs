@@ -18,7 +18,7 @@ This is the complete API reference:
 __version__ = "1.1.5"
 
 # prints warning of python versions
-from lamin_logger import py_version_warning
+from lamin_utils import py_version_warning
 
 py_version_warning("3.7", "3.10")
 

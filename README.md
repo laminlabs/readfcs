@@ -7,4 +7,22 @@
 
 Lightweight Python library to load data and metadata from Flow Cytometry Standard (FCS) files into `DataFrame` and `AnnData` objects.
 
+<br>
+
+Install: ![pyversions](https://img.shields.io/pypi/pyversions/readfcs)
+
+```bash
+$ pip install readfcs
+```
+
+Get started:
+
+```python
+import readfcs
+
+readfcs.read()  # Read FCS files into `AnnData`
+
+readfcs.ReadFCS()  # Debug possible integrity issues in your FCS files
+```
+
 Read the [docs](https://lamin.ai/docs/readfcs) or read the [blog post](https://lamin.ai/blog/2022/readfcs).
