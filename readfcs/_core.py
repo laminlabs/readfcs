@@ -215,8 +215,8 @@ class ReadFCS:
             )
             mapper = pd.Series(adata.var.index, index=adata.var["channel"])
             if self.meta.get("spill") is not None:
-                self._meta["spill"].index = self.meta["spill"].index.map(mapper)
-                self._meta["spill"].columns = self.meta["spill"].columns.map(mapper)
+                self._meta["spill"].rename(index=mapper, inplace=True)
+                self._meta["spill"].rename(columns=mapper, inplace=True)
 
         # write metadata into adata.uns
         adata.uns["meta"] = self.meta
