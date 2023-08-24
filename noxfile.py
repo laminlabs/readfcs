@@ -2,7 +2,7 @@ from pathlib import Path
 
 import nox
 
-nox.options.reuse_existing_virtualenvs = True
+nox.options.default_venv_backend = "none"
 
 
 @nox.session(python=["3.7", "3.8", "3.9", "3.10", "3.11"])
