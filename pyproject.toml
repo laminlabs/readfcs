@@ -15,7 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
 ]
 dependencies = [
-    "lamin_logger",
+    "lamin_utils",
     "fcsparser",
     "anndata",
 ]
