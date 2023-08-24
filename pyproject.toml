@@ -27,11 +27,8 @@ Home = "https://github.com/laminlabs/readfcs"
 dev = [
     "pre-commit",
     "nox",
-]
-test = [
     "pytest>=6.0",
     "pytest-cov",
-    "nbmake",
     "nbproject-test",
 ]
 
