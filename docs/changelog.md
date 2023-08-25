@@ -3,6 +3,7 @@
 <!-- prettier-ignore -->
 Name | PR | Developer | Date | Version
 --- | --- | --- | --- | ---
+👷 Remove nox cache | [34](https://github.com/laminlabs/readfcs/pull/34) | [sunnyosun](https://github.com/sunnyosun) | 2023-08-25 |
 👷 Test py3.11 | [33](https://github.com/laminlabs/readfcs/pull/33) | [sunnyosun](https://github.com/sunnyosun) | 2023-08-25 | 1.1.6
 🚑️ Raise error if the spill index doesn't match channels | [32](https://github.com/laminlabs/readfcs/pull/32) | [sunnyosun](https://github.com/sunnyosun) | 2023-08-24 |
 ✏️ Fix blank stripping | [30](https://github.com/laminlabs/readfcs/pull/30) | [sunnyosun](https://github.com/sunnyosun) | 2023-08-08 | 1.1.5
