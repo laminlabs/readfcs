@@ -32,11 +32,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
           cache-dependency-path: ".github/workflows/build.yml" # See dependencies below
-      - name: Cache nox
-        uses: actions/cache@v3
-        with:
-          path: .nox
-          key: nox-${{ runner.os }}
       - name: Cache pre-commit
         uses: actions/cache@v3
         with:
