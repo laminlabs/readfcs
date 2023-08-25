@@ -3,6 +3,7 @@
 <!-- prettier-ignore -->
 Name | PR | Developer | Date | Version
 --- | --- | --- | --- | ---
+👷 Test py3.11 | [33](https://github.com/laminlabs/readfcs/pull/33) | [sunnyosun](https://github.com/sunnyosun) | 2023-08-25 |
 🚑️ Raise error if the spill index doesn't match channels | [32](https://github.com/laminlabs/readfcs/pull/32) | [sunnyosun](https://github.com/sunnyosun) | 2023-08-24 |
 ✏️ Fix blank stripping | [30](https://github.com/laminlabs/readfcs/pull/30) | [sunnyosun](https://github.com/sunnyosun) | 2023-08-08 | 1.1.5
 🚑️ Make sure channels are sorted by n | [29](https://github.com/laminlabs/readfcs/pull/29) | [sunnyosun](https://github.com/sunnyosun) | 2023-07-07 | 1.1.4
