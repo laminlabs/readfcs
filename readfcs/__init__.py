@@ -15,7 +15,7 @@ This is the complete API reference:
    datasets
 """
 
-__version__ = "1.1.5"
+__version__ = "1.1.6"
 
 # prints warning of python versions
 from lamin_utils import py_version_warning
