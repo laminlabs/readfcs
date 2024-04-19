@@ -3,6 +3,7 @@
 <!-- prettier-ignore -->
 Name | PR | Developer | Date | Version
 --- | --- | --- | --- | ---
+🏷️ Save object as category | [36](https://github.com/laminlabs/readfcs/pull/36) | [sunnyosun](https://github.com/sunnyosun) | 2024-04-19 |
 🍱 Added oetjen18 files | [35](https://github.com/laminlabs/readfcs/pull/35) | [sunnyosun](https://github.com/sunnyosun) | 2023-10-03 | 1.1.7
 👷 Remove nox cache | [34](https://github.com/laminlabs/readfcs/pull/34) | [sunnyosun](https://github.com/sunnyosun) | 2023-08-25 |
 👷 Test py3.11 | [33](https://github.com/laminlabs/readfcs/pull/33) | [sunnyosun](https://github.com/sunnyosun) | 2023-08-25 | 1.1.6
