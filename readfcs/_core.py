@@ -225,6 +225,10 @@ class ReadFCS:
 
         # write metadata into adata.uns
         adata.uns["meta"] = self.meta
+
+        for k, v in adata.var.dtypes.items():
+            if v == "object":
+                adata.var[k] = adata.var[k].astype("category")
         return adata
 
 
