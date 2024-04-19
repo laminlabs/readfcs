@@ -15,12 +15,8 @@ This is the complete API reference:
    datasets
 """
 
-__version__ = "1.1.7"
+__version__ = "1.1.8"
 
-# prints warning of python versions
-from lamin_utils import py_version_warning
-
-py_version_warning("3.7", "3.10")
 
 from . import datasets
 from ._core import ReadFCS, read, view
