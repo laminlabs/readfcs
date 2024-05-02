@@ -24,7 +24,7 @@ def _channels_to_df(meta_raw: dict) -> dict:
     # channel groups are $PnB, $PnS, $PnN...
     for k, v in meta_raw.items():
         # Get all fields with $PnX pattern
-        if re.match("^\$P\d+[A-Z]$", k):  # noqa
+        if re.match(r"^\$P\d+[A-Z]$", k):  # noqa
             group_key = f"$Pn{k[-1]}"
             if group_key not in channel_groups:
                 channel_groups[group_key] = []
