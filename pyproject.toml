@@ -15,9 +15,9 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 dependencies = [
+    "scipy<1.13.0rc1", # for compatibility with fcsparser
     "lamin_utils",
     "fcsparser",
-    "scipy<1.13.0rc1", # for compatibility with fcsparser
     "anndata",
 ]
 
