@@ -3,9 +3,9 @@
 <!-- prettier-ignore -->
 Name | PR | Developer | Date | Version
 --- | --- | --- | --- | ---
-⬇️ Upper bound scipy for compatibility with fcsparser | [38](https://github.com/laminlabs/readfcs/pull/38) | [Koncopd](https://github.com/Koncopd) | 2024-10-21 |
+⬇️ Upper bound scipy for compatibility with fcsparser | [38](https://github.com/laminlabs/readfcs/pull/38) | [Koncopd](https://github.com/Koncopd) | 2024-10-21 | 1.1.9
 escape $ properly | [37](https://github.com/laminlabs/readfcs/pull/37) | [Zethson](https://github.com/Zethson) | 2024-05-02 |
-🏷️ Save object as category | [36](https://github.com/laminlabs/readfcs/pull/36) | [sunnyosun](https://github.com/sunnyosun) | 2024-04-19 |
+🏷️ Save object as category | [36](https://github.com/laminlabs/readfcs/pull/36) | [sunnyosun](https://github.com/sunnyosun) | 2024-04-19 | 1.1.8
 🍱 Added oetjen18 files | [35](https://github.com/laminlabs/readfcs/pull/35) | [sunnyosun](https://github.com/sunnyosun) | 2023-10-03 | 1.1.7
 👷 Remove nox cache | [34](https://github.com/laminlabs/readfcs/pull/34) | [sunnyosun](https://github.com/sunnyosun) | 2023-08-25 |
 👷 Test py3.11 | [33](https://github.com/laminlabs/readfcs/pull/33) | [sunnyosun](https://github.com/sunnyosun) | 2023-08-25 | 1.1.6
