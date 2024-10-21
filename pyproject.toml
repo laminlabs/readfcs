@@ -18,6 +18,7 @@ classifiers = [
 dependencies = [
     "lamin_utils",
     "fcsparser",
+    "numpy<2.0.0", # for compatibility with fcsparser
     "anndata",
 ]
 
