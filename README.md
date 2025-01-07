@@ -25,4 +25,4 @@ readfcs.read()  # Read FCS files into `AnnData`
 readfcs.ReadFCS()  # Debug possible integrity issues in your FCS files
 ```
 
-Read the [docs](https://lamin.ai/docs/readfcs) or read the [blog post](https://lamin.ai/blog/2022/readfcs).
+Read the [docs](https://readfcs.lamin.ai/) or read the [blog post](https://lamin.ai/blog/2022/readfcs).
