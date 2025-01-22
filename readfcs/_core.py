@@ -1,7 +1,7 @@
 import copy
 import re
 from pathlib import Path
-from typing import Dict, Union
+from typing import Union
 
 import anndata as ad
 import flowio
@@ -13,18 +13,17 @@ def _channels_df(text: dict) -> pd.DataFrame:
     """Format channels into a DataFrame.
 
     Args:
-    text: dict
-        original metadata
+        text: original metadata
 
     Returns:
         a DataFrame of channels with columns PnN, PnS, etc.
     """
-    channel_groups: Dict = {}
+    channel_groups: dict = {}
 
     # channel groups are $PnB, $PnS, $PnN...
     for k, v in text.items():
         # Get all fields with $PnX pattern
-        if re.match(r"^p\d+[a-z]$", k):  # noqa
+        if re.match(r"^p\d+[a-z]$", k):
             group_key = f"Pn{k[-1].upper()}"
             if group_key not in channel_groups:
                 channel_groups[group_key] = []
@@ -63,11 +62,7 @@ def _get_spill_matrix(matrix_string: str) -> pd.DataFrame:
     Published 2017 Jul 26. doi:10.3389/fimmu.2017.00858
 
     Args:
-    matrix_string: str
-        string value extracted from the 'spill' parameter of the FCS file
-
-    Returns:
-        Pandas.DataFrame
+        matrix_string: string value extracted from the 'spill' parameter of the FCS file
     """
     matrix_list = matrix_string.split(",")
     n = int(matrix_list[0])
@@ -77,8 +72,8 @@ def _get_spill_matrix(matrix_string: str) -> pd.DataFrame:
     matrix = np.reshape(list(map(float, values)), (n, n))
     matrix_df = pd.DataFrame(matrix)
     matrix_df = matrix_df.rename(
-        index={k: v for k, v in zip(matrix_df.columns.to_list(), header)},
-        columns={k: v for k, v in zip(matrix_df.columns.to_list(), header)},
+        index=dict(zip(matrix_df.columns.to_list(), header)),
+        columns=dict(zip(matrix_df.columns.to_list(), header)),
     )
     return matrix_df
 
@@ -95,6 +90,10 @@ class ReadFCS:
 
     def __init__(self, filepath: Union[str, Path], data_set: int = 0) -> None:
         # FlowIO makes all keys lowercase in .text
+        if isinstance(
+            filepath, Path
+        ):  # Fix for https://laminlabs.slack.com/archives/C07DB677JF6/p1737542733821819?thread_ts=1729512530.482559&cid=C07DB677JF6
+            filepath = str(filepath)
         self._flow_data = flowio.read_multiple_data_sets(filepath)[data_set]
 
         # data
@@ -144,9 +143,9 @@ class ReadFCS:
 
     def compensate(self) -> None:
         """Apply compensation to event data."""
-        assert (
-            self.meta["spill"] is not None
-        ), f"Unable to locate spillover matrix, please provide a compensation matrix"  # noqa
+        assert self.meta["spill"] is not None, (  #  noqa: S101
+            "Unable to locate spillover matrix, please provide a compensation matrix"
+        )
         channel_idx = [
             i
             for i, (_, row) in enumerate(self.channels.iterrows())
@@ -156,8 +155,8 @@ class ReadFCS:
         channel_idx = [
             i
             for i, (_, row) in enumerate(self.channels.iterrows())
-            if all([z not in row["PnN"].lower() for z in ["fsc", "ssc", "time"]])
-            and row["PnN"] in self.meta["spill"].columns  # noqa
+            if all(z not in row["PnN"].lower() for z in ["fsc", "ssc", "time"])
+            and row["PnN"] in self.meta["spill"].columns
         ]
 
         comp_data = self.data.iloc[:, channel_idx]
@@ -168,17 +167,13 @@ class ReadFCS:
         """Convert the FCSFile instance to an AnnData.
 
         Args:
-            reindex: bool. Default is True
-                variables will be reindexed with marker names if possible otherwise
-                channels
-        Returns:
-            an AnnData object
+            reindex: variables will be reindexed with marker names if possible otherwise channels
         """
         channels_mapping = {
             "PnN": "channel",
             "PnS": "marker",
         }
-        if any([i for i in ["PnN", "PnS"] if i not in self.channels.columns]):
+        if any(i for i in ["PnN", "PnS"] if i not in self.channels.columns):
             raise AssertionError(
                 "PnN or PnS field not found in the file!\nPlease check your file"
                 " content with `readfcs.view`!"
@@ -222,7 +217,7 @@ class ReadFCS:
                 n_mismatch = self.meta["spill"].index.map(mapper).isna().sum()
                 if n_mismatch > 0:
                     raise AssertionError(
-                        f"spill matrix index contains {n_mismatch} mismatches to the channels, please check your metadata."  # noqa
+                        f"spill matrix index contains {n_mismatch} mismatches to the channels, please check your metadata."
                     )
                 meta["spill"] = meta["spill"].rename(index=mapper)
                 meta["spill"] = meta["spill"].rename(columns=mapper)
@@ -255,10 +250,8 @@ def view(filepath: Union[str, Path], data_set: int = 0) -> tuple:
     """Read in file content without preprocessing for debugging.
 
     Args:
-        filepath: str or Path
-            location of fcs file to parse
-        data_set: int. Default is 0.
-            Index of retrieved data set in the fcs file.
+        filepath: Location of fcs file to parse
+        data_set: Index of retrieved data set in the fcs file.
 
     Returns:
         a tuple of (data, metadata)
