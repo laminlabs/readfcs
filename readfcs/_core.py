@@ -86,15 +86,33 @@ class ReadFCS:
             location of fcs file to parse
         data_set: int. Default is 0.
             Index of retrieved data set in the fcs file.
+        ignore_offset_error: Ignore data offset error.
+            Default is False
+        ignore_offset_discrepancy: Ignore discrepancy between the HEADER and TEXT values for the DATA byte offset location.
+            Default is False
+        use_header_offsets: Use the HEADER section for the data offset locations.
+            Default is False. Setting this option to True also suppresses an error in cases of an offset discrepancy.
     """
 
-    def __init__(self, filepath: Union[str, Path], data_set: int = 0) -> None:
+    def __init__(
+        self,
+        filepath: Union[str, Path],
+        data_set: int = 0,
+        ignore_offset_error: bool = False,
+        ignore_offset_discrepancy: bool = False,
+        use_header_offsets: bool = False,
+    ) -> None:
         # FlowIO makes all keys lowercase in .text
         if isinstance(
             filepath, Path
         ):  # Fix for https://laminlabs.slack.com/archives/C07DB677JF6/p1737542733821819?thread_ts=1729512530.482559&cid=C07DB677JF6
             filepath = str(filepath)
-        self._flow_data = flowio.read_multiple_data_sets(filepath)[data_set]
+        self._flow_data = flowio.read_multiple_data_sets(
+            filepath,
+            ignore_offset_error=ignore_offset_error,
+            ignore_offset_discrepancy=ignore_offset_discrepancy,
+            use_header_offsets=use_header_offsets,
+        )[data_set]
 
         # data
         self._data = pd.DataFrame(
@@ -143,9 +161,10 @@ class ReadFCS:
 
     def compensate(self) -> None:
         """Apply compensation to event data."""
-        assert self.meta["spill"] is not None, (  #  noqa: S101
-            "Unable to locate spillover matrix, please provide a compensation matrix"
-        )
+        if self.meta["spill"] is None:
+            raise AssertionError(
+                "Unable to locate spillover matrix, please provide a compensation matrix"
+            )
         channel_idx = [
             i
             for i, (_, row) in enumerate(self.channels.iterrows())
@@ -246,12 +265,27 @@ def read(filepath, reindex=True) -> ad.AnnData:
     return fcsfile.to_anndata(reindex=reindex)
 
 
-def view(filepath: Union[str, Path], data_set: int = 0) -> tuple:
+def view(
+    filepath: Union[str, Path],
+    data_set: int = 0,
+    ignore_offset_error: bool = False,
+    ignore_offset_discrepancy: bool = False,
+    use_header_offsets: bool = False,
+    only_text: bool = False,
+) -> tuple:
     """Read in file content without preprocessing for debugging.
 
     Args:
         filepath: Location of fcs file to parse
         data_set: Index of retrieved data set in the fcs file.
+        ignore_offset_error: Ignore data offset error.
+            Default is False
+        ignore_offset_discrepancy: Ignore discrepancy between the HEADER and TEXT values for the DATA byte offset location.
+            Default is False
+        use_header_offsets: Use the HEADER section for the data offset locations.
+            Default is False. Setting this option to True also suppresses an error in cases of an offset discrepancy.
+        only_text: Only read the “text” segment of the FCS file without loading event data.
+            Default is False
 
     Returns:
         a tuple of (data, metadata)
@@ -261,10 +295,18 @@ def view(filepath: Union[str, Path], data_set: int = 0) -> tuple:
     See `flowio.FlowData`:
         https://flowio.readthedocs.io/en/latest/api.html#flowio.FlowData
     """
-    flow_data = flowio.read_multiple_data_sets(filepath)[data_set]
+    flow_data = flowio.read_multiple_data_sets(
+        filepath,
+        ignore_offset_error=ignore_offset_error,
+        ignore_offset_discrepancy=ignore_offset_discrepancy,
+        use_header_offsets=use_header_offsets,
+    )[data_set]
 
     # data
-    data = np.reshape(flow_data.events, (-1, flow_data.channel_count))
+    if only_text:
+        data = None
+    else:
+        data = np.reshape(flow_data.events, (-1, flow_data.channel_count))
 
     # meta
     meta = flow_data.text
