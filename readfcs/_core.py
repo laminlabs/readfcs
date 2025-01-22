@@ -1,59 +1,56 @@
+import copy
 import re
 from pathlib import Path
 from typing import Dict, Union
 
 import anndata as ad
-import fcsparser
+import flowio
 import numpy as np
 import pandas as pd
 
 
-def _channels_to_df(meta_raw: dict) -> dict:
+def _channels_df(text: dict) -> pd.DataFrame:
     """Format channels into a DataFrame.
 
     Args:
-    meta_raw: dict
+    text: dict
         original metadata
 
     Returns:
-        a dict of metadata with "channels"
+        a DataFrame of channels with columns PnN, PnS, etc.
     """
-    meta = {}
     channel_groups: Dict = {}
 
     # channel groups are $PnB, $PnS, $PnN...
-    for k, v in meta_raw.items():
+    for k, v in text.items():
         # Get all fields with $PnX pattern
-        if re.match(r"^\$P\d+[A-Z]$", k):  # noqa
-            group_key = f"$Pn{k[-1]}"
+        if re.match(r"^p\d+[a-z]$", k):  # noqa
+            group_key = f"Pn{k[-1].upper()}"
             if group_key not in channel_groups:
                 channel_groups[group_key] = []
             # The numeric index n
-            idx = int(k.lstrip("$P")[:-1])
+            idx = int(k.lstrip("p")[:-1])
             channel_groups[group_key].append((idx, v))
-        else:
-            meta[k] = v
 
     # format channels into a dataframe
-    k = "$PnN"
+    k = "PnN"
     df_groups = pd.DataFrame(channel_groups.get(k), columns=["n", k]).set_index("n")
 
     for k, group in channel_groups.items():
-        if k == "$PnN":
+        if k == "PnN":
             continue
         df_group = pd.DataFrame(group, columns=["n", k]).set_index("n")
         df_groups = df_groups.join(df_group)
 
     # reorder df_groups columns
-    df_groups.insert(0, "$PnN", df_groups.pop("$PnN"))
-    if "$PnS" in df_groups.columns:
-        df_groups.insert(1, "$PnS", df_groups.pop("$PnS"))
+    df_groups.insert(0, "PnN", df_groups.pop("PnN"))
+    if "PnS" in df_groups.columns:
+        df_groups.insert(1, "PnS", df_groups.pop("PnS"))
     # convert nan to '' otherwise saving to anndata will error
     df_groups.fillna("", inplace=True)
-    # make sure channels are sorted by n
-    meta["channels"] = df_groups.sort_index()
 
-    return meta
+    # make sure channels are sorted by n
+    return df_groups.sort_index()
 
 
 def _get_spill_matrix(matrix_string: str) -> pd.DataFrame:
@@ -98,27 +95,26 @@ class ReadFCS:
 
     def __init__(self, filepath: Union[str, Path], data_set: int = 0) -> None:
         # No metadata formating using fcsparser
-        self._meta_raw, self._data = fcsparser.parse(
-            filepath, data_set=data_set, channel_naming="$PnN"
+        # self._meta_raw, self._data = fcsparser.parse(
+        #     filepath, data_set=data_set, channel_naming="$PnN"
+        # )
+        self._flow_data = flowio.FlowData(filepath)
+
+        # data
+        self._data = pd.DataFrame(
+            np.reshape(self._flow_data.events, (-1, self._flow_data.channel_count))
         )
 
-        # Format channels into a dataframe as `self.meta["channels"]`
-        self._meta = _channels_to_df(self._meta_raw)
+        # meta
+        self._meta = self._flow_data.text
+        self._channels = _channels_df(self._flow_data.text)
 
         # header
-        self._meta["header"] = self.meta["__header__"]
-        self._meta["header"]["FCS format"] = self.meta["__header__"][
-            "FCS format"
-        ].decode()
+        self._header = self._flow_data.header
 
         # compensation matrix
         self.spill_txt = None
         self.spill = None
-        if "SPILL" in self.meta:
-            self._meta["spill"] = self._meta.pop("SPILL")
-        if "SPILLOVER" in self.meta:
-            self._meta["spillover"] = self._meta.pop("SPILLOVER")
-
         spill_list = [
             self.meta.get(key)
             for key in ["spill", "spillover"]
@@ -133,6 +129,11 @@ class ReadFCS:
     def header(self) -> dict:
         """Header."""
         return self._meta["header"]
+
+    @property
+    def channels(self) -> pd.DataFrame:
+        """Channels."""
+        return self._channels
 
     @property
     def meta(self) -> dict:
@@ -151,15 +152,15 @@ class ReadFCS:
         ), f"Unable to locate spillover matrix, please provide a compensation matrix"  # noqa
         channel_idx = [
             i
-            for i, (idx, row) in enumerate(self._meta["channels"].iterrows())
-            if row["$PnS"] not in ["", " "]
+            for i, (_, row) in enumerate(self.channels.iterrows())
+            if row["PnS"] not in ["", " "]
         ]
 
         channel_idx = [
             i
-            for i, (idx, row) in enumerate(self._meta["channels"].iterrows())
-            if all([z not in row["$PnN"].lower() for z in ["fsc", "ssc", "time"]])
-            and row["$PnN"] in self.meta["spill"].columns  # noqa
+            for i, (_, row) in enumerate(self.channels.iterrows())
+            if all([z not in row["PnN"].lower() for z in ["fsc", "ssc", "time"]])
+            and row["PnN"] in self.meta["spill"].columns  # noqa
         ]
 
         comp_data = self.data.iloc[:, channel_idx]
@@ -176,19 +177,20 @@ class ReadFCS:
             an AnnData object
         """
         channels_mapping = {
-            "$PnN": "channel",
-            "$PnS": "marker",
+            "PnN": "channel",
+            "PnS": "marker",
         }
-        if any([i for i in ["$PnN", "$PnS"] if i not in self.meta["channels"].columns]):
+        if any([i for i in ["PnN", "PnS"] if i not in self.channels.columns]):
             raise AssertionError(
-                "$PnN or $PnS field not found in the file!\nPlease check your file"
+                "PnN or PnS field not found in the file!\nPlease check your file"
                 " content with `readfcs.view`!"
             )
 
         # AnnData only allows str index
-        var = self._meta["channels"]
-        X = self._data
+        var = self.channels
+        X = self.data
         var.index = var.index.astype(str)
+        var.index.name = "n"
         X.columns = var.index
         X.index = X.index.astype(str)
 
@@ -205,26 +207,30 @@ class ReadFCS:
 
         # by default, we index variables with marker
         # use channels for non-marker channels
+        meta = copy.deepcopy(
+            self.meta
+        )  # adata.uns["meta"] will be reindexed but not self.meta
         if reindex:
             adata.var = adata.var.reset_index()
-            adata.var.replace({" ": ""}, inplace=True)
+            adata.var.replace({" ": ""}, inplace=True)  # replace empty space with ''
             adata.var.index = np.where(
                 adata.var["marker"] == "",
                 adata.var["channel"],
                 adata.var["marker"],
             )
+            # spill matrix are indexed with channels
             mapper = pd.Series(adata.var.index, index=adata.var["channel"])
             if self.meta.get("spill") is not None:
-                n_mismatch = self._meta["spill"].index.map(mapper).isna().sum()
+                n_mismatch = self.meta["spill"].index.map(mapper).isna().sum()
                 if n_mismatch > 0:
                     raise AssertionError(
                         f"spill matrix index contains {n_mismatch} mismatches to the channels, please check your metadata."  # noqa
                     )
-                self._meta["spill"].rename(index=mapper, inplace=True)
-                self._meta["spill"].rename(columns=mapper, inplace=True)
+                meta["spill"] = meta["spill"].rename(index=mapper)
+                meta["spill"] = meta["spill"].rename(columns=mapper)
 
         # write metadata into adata.uns
-        adata.uns["meta"] = self.meta
+        adata.uns["meta"] = meta
 
         for k, v in adata.var.dtypes.items():
             if v == "object":
@@ -264,5 +270,11 @@ def view(filepath: Union[str, Path], data_set: int = 0):
 
     See `fcsparser.parse`: https://github.com/eyurtsev/fcsparser
     """
-    meta, data = fcsparser.parse(filepath, data_set=data_set, channel_naming="$PnN")
+    flow_data = flowio.FlowData(filepath)
+
+    # data
+    data = np.reshape(flow_data.events, (-1, flow_data.channel_count))
+
+    # meta
+    meta = flow_data.text
     return meta, data
