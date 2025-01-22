@@ -84,18 +84,21 @@ def _get_spill_matrix(matrix_string: str) -> pd.DataFrame:
 
 
 class ReadFCS:
-    """Read in fcs file using fcsparesr as preprocess the metadata.
+    """Read in fcs file using flowio.FlowData and preprocess the metadata.
 
     Args:
         filepath: str or Path
             location of fcs file to parse
-        data_set: int
+        data_set: int or None. Default is None
             Index of retrieved data set in the fcs file.
     """
 
-    def __init__(self, filepath: Union[str, Path], data_set: int = 0) -> None:
+    def __init__(self, filepath: Union[str, Path], data_set: int | None = None) -> None:
         # FlowIO makes all keys lowercase in .text
-        self._flow_data = flowio.FlowData(filepath)
+        if data_set is not None:
+            self._flow_data = flowio.read_multiple_data_sets()[data_set]
+        else:
+            self._flow_data = flowio.FlowData(filepath)
 
         # data
         self._data = pd.DataFrame(
@@ -251,13 +254,13 @@ def read(filepath, reindex=True) -> ad.AnnData:
     return fcsfile.to_anndata(reindex=reindex)
 
 
-def view(filepath: Union[str, Path], data_set: int = 0):
+def view(filepath: Union[str, Path], data_set: int | None = None) -> tuple:
     """Read in file content without preprocessing for debugging.
 
     Args:
         filepath: str or Path
             location of fcs file to parse
-        data_set: int
+        data_set: int or None. Default is None
             Index of retrieved data set in the fcs file.
 
     Returns:
@@ -265,9 +268,13 @@ def view(filepath: Union[str, Path], data_set: int = 0):
         - data is a DataFrame
         - metadata is a dictionary
 
-    See `fcsparser.parse`: https://github.com/eyurtsev/fcsparser
+    See `flowio.FlowData`:
+        https://flowio.readthedocs.io/en/latest/api.html#flowio.FlowData
     """
-    flow_data = flowio.FlowData(filepath)
+    if data_set is not None:
+        flow_data = flowio.read_multiple_data_sets(filepath)[data_set]
+    else:
+        flow_data = flowio.FlowData(filepath)
 
     # data
     data = np.reshape(flow_data.events, (-1, flow_data.channel_count))
