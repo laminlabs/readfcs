@@ -89,18 +89,13 @@ class ReadFCS:
     Args:
         filepath: str or Path
             location of fcs file to parse
-        data_set: int or None. Default is None
+        data_set: int. Default is 0.
             Index of retrieved data set in the fcs file.
     """
 
-    def __init__(
-        self, filepath: Union[str, Path], data_set: Union[int, None] = None
-    ) -> None:
+    def __init__(self, filepath: Union[str, Path], data_set: int = 0) -> None:
         # FlowIO makes all keys lowercase in .text
-        if data_set is not None:
-            self._flow_data = flowio.read_multiple_data_sets()[data_set]
-        else:
-            self._flow_data = flowio.FlowData(filepath)
+        self._flow_data = flowio.read_multiple_data_sets(filepath)[data_set]
 
         # data
         self._data = pd.DataFrame(
@@ -256,13 +251,13 @@ def read(filepath, reindex=True) -> ad.AnnData:
     return fcsfile.to_anndata(reindex=reindex)
 
 
-def view(filepath: Union[str, Path], data_set: Union[int, None] = None) -> tuple:
+def view(filepath: Union[str, Path], data_set: int = 0) -> tuple:
     """Read in file content without preprocessing for debugging.
 
     Args:
         filepath: str or Path
             location of fcs file to parse
-        data_set: int or None. Default is None
+        data_set: int. Default is 0.
             Index of retrieved data set in the fcs file.
 
     Returns:
@@ -273,10 +268,7 @@ def view(filepath: Union[str, Path], data_set: Union[int, None] = None) -> tuple
     See `flowio.FlowData`:
         https://flowio.readthedocs.io/en/latest/api.html#flowio.FlowData
     """
-    if data_set is not None:
-        flow_data = flowio.read_multiple_data_sets(filepath)[data_set]
-    else:
-        flow_data = flowio.FlowData(filepath)
+    flow_data = flowio.read_multiple_data_sets(filepath)[data_set]
 
     # data
     data = np.reshape(flow_data.events, (-1, flow_data.channel_count))
