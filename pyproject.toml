@@ -9,7 +9,6 @@ readme = "README.md"
 dynamic = ["version", "description"]
 classifiers = [
     "License :: OSI Approved :: Apache Software License",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -130,7 +129,9 @@ lint.ignore = [
     # subprocess` call: check for execution of untrusted input - https://github.com/PyCQA/bandit/issues/333
     "S603",
     # Starting a process with a partial executable path
-    "S607"
+    "S607",
+    # Audit URL open for permitted schemes. Allowing use of `file:` or custom schemes is often unexpected.
+    "S310"
 ]
 
 [tool.ruff.lint.pydocstyle]
