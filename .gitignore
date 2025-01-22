@@ -108,3 +108,4 @@ docs/conf.py
 _docs_tmp*
 *.fcs
 *.h5ad
+test.ipynb

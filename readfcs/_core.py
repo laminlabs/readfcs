@@ -247,21 +247,36 @@ class ReadFCS:
         for k, v in adata.var.dtypes.items():
             if v == "object":
                 adata.var[k] = adata.var[k].astype("category")
+
         return adata
 
 
-def read(filepath, reindex=True) -> ad.AnnData:
+def read(
+    filepath: str | Path,
+    reindex: bool = True,
+    ignore_offset_error: bool = False,
+    ignore_offset_discrepancy: bool = False,
+    use_header_offsets: bool = False,
+) -> ad.AnnData:
     """Read in fcs file as AnnData.
 
     Args:
-        filepath: str or Path
-            location of fcs file to parse
-        reindex: bool. Default is True
-            variables will be reindexed with marker names if possible otherwise channels
+        filepath: Location of fcs file to parse
+        reindex: Whether variables will be reindexed with marker names if possible otherwise channels
+        ignore_offset_error: Ignore data offset error.
+        ignore_offset_discrepancy: Ignore discrepancy between the HEADER and TEXT values for the DATA byte offset location.
+        use_header_offsets: Use the HEADER section for the data offset locations.
+            Setting this option to True also suppresses an error in cases of an offset discrepancy.
+
     Returns:
-        an AnnData object
+        An AnnData object
     """
-    fcsfile = ReadFCS(filepath)
+    fcsfile = ReadFCS(
+        filepath,
+        ignore_offset_error=ignore_offset_error,
+        ignore_offset_discrepancy=ignore_offset_discrepancy,
+        use_header_offsets=use_header_offsets,
+    )
     return fcsfile.to_anndata(reindex=reindex)
 
 
@@ -279,13 +294,10 @@ def view(
         filepath: Location of fcs file to parse
         data_set: Index of retrieved data set in the fcs file.
         ignore_offset_error: Ignore data offset error.
-            Default is False
         ignore_offset_discrepancy: Ignore discrepancy between the HEADER and TEXT values for the DATA byte offset location.
-            Default is False
         use_header_offsets: Use the HEADER section for the data offset locations.
-            Default is False. Setting this option to True also suppresses an error in cases of an offset discrepancy.
+            Setting this option to True also suppresses an error in cases of an offset discrepancy.
         only_text: Only read the “text” segment of the FCS file without loading event data.
-            Default is False
 
     Returns:
         a tuple of (data, metadata)
@@ -310,4 +322,5 @@ def view(
 
     # meta
     meta = flow_data.text
+
     return meta, data
