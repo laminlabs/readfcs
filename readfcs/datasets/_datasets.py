@@ -25,7 +25,7 @@ def Oetjen18_t1() -> str:
     Reference: https://insight.jci.org/articles/view/124928
 
     """
-    url = "https://lamindb-dev-datasets.s3.amazonaws.com/.lamindb/DBNEczSgBui0bbzBXMGH.fcs"  # noqa
+    url = "https://lamindb-dev-datasets.s3.amazonaws.com/.lamindb/DBNEczSgBui0bbzBXMGH.fcs"
     path_data, _ = urlretrieve(url, "oetjen18_t1.fcs")
 
     return path_data
@@ -40,7 +40,7 @@ def Oetjen18_t2() -> str:
 
     Reference: https://insight.jci.org/articles/view/124928
     """
-    url = "https://lamindb-dev-datasets.s3.amazonaws.com/.lamindb/ckbFvcuxG4tln7OIg3ml.fcs"  # noqa
+    url = "https://lamindb-dev-datasets.s3.amazonaws.com/.lamindb/ckbFvcuxG4tln7OIg3ml.fcs"
     path_data, _ = urlretrieve(url, "oetjen18_t2.fcs")
 
     return path_data
@@ -55,7 +55,7 @@ def Oetjen18_dc() -> str:
 
     Reference: https://insight.jci.org/articles/view/124928
     """
-    url = "https://lamindb-dev-datasets.s3.amazonaws.com/.lamindb/yYLIWRT3sg4E3NUFigpB.fcs"  # noqa
+    url = "https://lamindb-dev-datasets.s3.amazonaws.com/.lamindb/yYLIWRT3sg4E3NUFigpB.fcs"
     path_data, _ = urlretrieve(url, "oetjen18_dc.fcs")
 
     return path_data
