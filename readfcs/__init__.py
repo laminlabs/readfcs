@@ -15,7 +15,7 @@ This is the complete API reference:
    datasets
 """
 
-__version__ = "1.1.9"
+__version__ = "2.0.0"
 
 
 from . import datasets
