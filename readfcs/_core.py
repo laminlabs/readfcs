@@ -94,10 +94,7 @@ class ReadFCS:
     """
 
     def __init__(self, filepath: Union[str, Path], data_set: int = 0) -> None:
-        # No metadata formating using fcsparser
-        # self._meta_raw, self._data = fcsparser.parse(
-        #     filepath, data_set=data_set, channel_naming="$PnN"
-        # )
+        # FlowIO makes all keys lowercase in .text
         self._flow_data = flowio.FlowData(filepath)
 
         # data
@@ -171,7 +168,8 @@ class ReadFCS:
         """Convert the FCSFile instance to an AnnData.
 
         Args:
-            reindex: variables will be reindexed with marker names if possible otherwise
+            reindex: bool. Default is True
+                variables will be reindexed with marker names if possible otherwise
                 channels
         Returns:
             an AnnData object
@@ -244,9 +242,8 @@ def read(filepath, reindex=True) -> ad.AnnData:
     Args:
         filepath: str or Path
             location of fcs file to parse
-        reindex: bool
-            variables will be reindexed with marker names if possible otherwise
-            channels
+        reindex: bool. Default is True
+            variables will be reindexed with marker names if possible otherwise channels
     Returns:
         an AnnData object
     """
