@@ -93,7 +93,9 @@ class ReadFCS:
             Index of retrieved data set in the fcs file.
     """
 
-    def __init__(self, filepath: Union[str, Path], data_set: int | None = None) -> None:
+    def __init__(
+        self, filepath: Union[str, Path], data_set: Union[int, None] = None
+    ) -> None:
         # FlowIO makes all keys lowercase in .text
         if data_set is not None:
             self._flow_data = flowio.read_multiple_data_sets()[data_set]
@@ -128,7 +130,7 @@ class ReadFCS:
     @property
     def header(self) -> dict:
         """Header."""
-        return self._meta["header"]
+        return self._header
 
     @property
     def channels(self) -> pd.DataFrame:
@@ -254,7 +256,7 @@ def read(filepath, reindex=True) -> ad.AnnData:
     return fcsfile.to_anndata(reindex=reindex)
 
 
-def view(filepath: Union[str, Path], data_set: int | None = None) -> tuple:
+def view(filepath: Union[str, Path], data_set: Union[int, None] = None) -> tuple:
     """Read in file content without preprocessing for debugging.
 
     Args:
