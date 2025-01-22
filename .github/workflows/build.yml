@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - name: Checkout main
@@ -34,6 +34,7 @@ jobs:
           cache-dependency-path: ".github/workflows/build.yml" # See dependencies below
       - name: Cache pre-commit
         uses: actions/cache@v3
+        if: matrix.python-version == '3.12'
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -42,15 +43,16 @@ jobs:
           python -m pip install -U pip
           pip install -U laminci
       - run: nox -s lint
-        if: matrix.python-version == '3.9'
+        if: matrix.python-version == '3.12'
       - run: nox -s build
       - name: Codecov
-        if: matrix.python-version == '3.9'
+        if: matrix.python-version == '3.12'
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
       - uses: cloudflare/pages-action@v1
         id: cloudflare
+        if: matrix.python-version == '3.12'
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 472bdad691b4483dea759eadb37110bd
