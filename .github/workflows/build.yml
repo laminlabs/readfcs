@@ -21,6 +21,7 @@ jobs:
           fetch-depth: 0
       - name: Checkout lndocs
         uses: actions/checkout@v3
+        if: matrix.python-version == '3.12'
         with:
           repository: laminlabs/lndocs
           ssh-key: ${{ secrets.READ_LNDOCS }}
@@ -34,6 +35,7 @@ jobs:
           cache-dependency-path: ".github/workflows/build.yml" # See dependencies below
       - name: Cache pre-commit
         uses: actions/cache@v3
+        if: matrix.python-version == '3.12'
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -51,6 +53,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
       - uses: cloudflare/pages-action@v1
         id: cloudflare
+        if: matrix.python-version == '3.12'
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 472bdad691b4483dea759eadb37110bd
