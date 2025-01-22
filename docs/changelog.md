@@ -3,6 +3,7 @@
 <!-- prettier-ignore -->
 Name | PR | Developer | Date | Version
 --- | --- | --- | --- | ---
+✨ Support Posix Paths | [42](https://github.com/laminlabs/readfcs/pull/42) | [Zethson](https://github.com/Zethson) | 2025-01-22 |
 ✨ Use `FlowIO` instead of `fcsparser` | [41](https://github.com/laminlabs/readfcs/pull/41) | [sunnyosun](https://github.com/sunnyosun) | 2025-01-22 |
 ⬇️ Upper bound scipy for compatibility with fcsparser | [38](https://github.com/laminlabs/readfcs/pull/38) | [Koncopd](https://github.com/Koncopd) | 2024-10-21 | 1.1.9
 escape $ properly | [37](https://github.com/laminlabs/readfcs/pull/37) | [Zethson](https://github.com/Zethson) | 2024-05-02 |
