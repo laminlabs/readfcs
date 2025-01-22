@@ -3,6 +3,7 @@
 <!-- prettier-ignore -->
 Name | PR | Developer | Date | Version
 --- | --- | --- | --- | ---
+✨ Pass parameters to read | [44](https://github.com/laminlabs/readfcs/pull/44) | [Zethson](https://github.com/Zethson) | 2025-01-22 |
 🎨 Pass params to FlowIO | [43](https://github.com/laminlabs/readfcs/pull/43) | [sunnyosun](https://github.com/sunnyosun) | 2025-01-22 |
 ✨ Support Posix Paths | [42](https://github.com/laminlabs/readfcs/pull/42) | [Zethson](https://github.com/Zethson) | 2025-01-22 |
 ✨ Use `FlowIO` instead of `fcsparser` | [41](https://github.com/laminlabs/readfcs/pull/41) | [sunnyosun](https://github.com/sunnyosun) | 2025-01-22 |
