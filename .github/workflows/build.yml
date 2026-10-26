@@ -54,13 +54,11 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-      - uses: cloudflare/pages-action@v1
+      - uses: cloudflare/wrangler-action@v3
         id: cloudflare
-        if: matrix.python-version == '3.12'
+        if: matrix.python-version == '3.12' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 472bdad691b4483dea759eadb37110bd
-          projectName: readfcs
-          directory: "_build/html"
+          command: pages deploy "_build/html" --project-name=readfcs
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          wranglerVersion: "3"

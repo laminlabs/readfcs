@@ -38,11 +38,6 @@ testpaths = [
     "docs",
 ]
 
-[tool.coverage.run]
-omit = [
-    "readfcs/*",
-]
-
 [tool.ruff]
 src = ["src"]
 line-length = 88

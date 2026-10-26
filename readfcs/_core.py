@@ -52,6 +52,21 @@ def _channels_df(text: dict) -> pd.DataFrame:
     return df_groups.sort_index()
 
 
+def _h5_safe_label(label: object) -> object:
+    """Replace `/` so the label can be an HDF5 key."""
+    if isinstance(label, str):
+        return label.replace("/", "_")
+    return label
+
+
+def _h5_safe_frame(df: pd.DataFrame) -> pd.DataFrame:
+    """Make DataFrame axis labels legal HDF5 keys.
+
+    AnnData writes these labels as HDF5 keys, which cannot contain `/`.
+    """
+    return df.rename(index=_h5_safe_label, columns=_h5_safe_label)
+
+
 def _get_spill_matrix(matrix_string: str) -> pd.DataFrame:
     """Generate a spill matrix for string.
 
@@ -212,8 +227,11 @@ class ReadFCS:
                 var[k] = var[k].map(repr)
 
         # create anndata with channel indexing variables
+        # pass an owned copy: with pandas>=3 (copy-on-write), the array AnnData
+        # takes from a DataFrame is a read-only view
         adata = ad.AnnData(
-            X,
+            X.to_numpy(copy=True),
+            obs=pd.DataFrame(index=X.index),
             var=var.rename(columns=channels_mapping),
         )
 
@@ -240,6 +258,10 @@ class ReadFCS:
                     )
                 meta["spill"] = meta["spill"].rename(index=mapper)
                 meta["spill"] = meta["spill"].rename(columns=mapper)
+
+        # marker names such as "LIVE/DEAD" are not legal HDF5 keys
+        if isinstance(meta.get("spill"), pd.DataFrame):
+            meta["spill"] = _h5_safe_frame(meta["spill"])
 
         # write metadata into adata.uns
         adata.uns["meta"] = meta
