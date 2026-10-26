@@ -212,8 +212,11 @@ class ReadFCS:
                 var[k] = var[k].map(repr)
 
         # create anndata with channel indexing variables
+        # pass an owned copy: with pandas>=3 (copy-on-write), the array AnnData
+        # takes from a DataFrame is a read-only view
         adata = ad.AnnData(
-            X,
+            X.to_numpy(copy=True),
+            obs=pd.DataFrame(index=X.index),
             var=var.rename(columns=channels_mapping),
         )
 
