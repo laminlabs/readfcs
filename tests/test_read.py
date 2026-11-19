@@ -1,3 +1,6 @@
+import flowio
+import pytest
+
 import readfcs
 
 
@@ -20,3 +23,22 @@ def test_read_anndata_writes_h5ad(tmp_path):
     path = tmp_path / "oetjen18_t1.h5ad"
     adata.write(path)
     assert path.exists()
+
+
+
+@pytest.mark.parametrize(
+    ("reindex", "expected_index"),
+    [(True, ["FSC-A", "SSC-A"]), (False, ["1", "2"])],
+)
+def test_read_without_marker_names(tmp_path, reindex, expected_index):
+    path = tmp_path / "no_markers.fcs"
+    channels = ["FSC-A", "SSC-A"]
+    with path.open("wb") as file:
+        flowio.create_fcs(file, [1.0, 2.0, 3.0, 4.0], channels)
+
+    adata = readfcs.read(path, reindex=reindex)
+
+    assert adata.X.tolist() == [[1.0, 2.0], [3.0, 4.0]]
+    assert adata.var["channel"].tolist() == channels
+    assert adata.var["marker"].tolist() == ["", ""]
+    assert adata.var_names.tolist() == expected_index

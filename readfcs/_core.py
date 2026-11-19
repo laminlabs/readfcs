@@ -207,14 +207,17 @@ class ReadFCS:
             "PnN": "channel",
             "PnS": "marker",
         }
-        if any(i for i in ["PnN", "PnS"] if i not in self.channels.columns):
+        if "PnN" not in self.channels.columns:
             raise AssertionError(
-                "PnN or PnS field not found in the file!\nPlease check your file"
+                "PnN field not found in the file!\nPlease check your file"
                 " content with `readfcs.view`!"
             )
 
-        # AnnData only allows str index
         var = self.channels
+        if "PnS" not in var.columns:
+            var = var.assign(PnS="")
+
+        # AnnData only allows str index
         X = self.data
         var.index = var.index.astype(str)
         var.index.name = "n"
